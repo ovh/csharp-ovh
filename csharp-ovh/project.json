@@ -1,0 +1,18 @@
+{
+  "version": "0.9.9-*",
+  "description": "chsarp-ovh Class Library",
+  "authors": [ "Luke Marlin" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "ini-parser": "2.2.4"
+      }
+    }
+  },
+  "dependencies": {
+    "Newtonsoft.Json": "8.0.2"
+  }
+}
