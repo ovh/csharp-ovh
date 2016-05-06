@@ -9,7 +9,6 @@ using System.Net;
 using System.Net.Cache;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Ovh.Api
 {
@@ -41,11 +40,11 @@ namespace Ovh.Api
     /// </summary>
     public class Client
     {
-        private readonly Dictionary<string, string> Endpoints = 
+        private readonly Dictionary<string, string> _endpoints =
             new Dictionary<string, string>();
 
-        private const int DefaultTimeout = 180;
-        private WebClient WebClient;
+        private const int _defaultTimeout = 180;
+        private WebClient _webClient;
 
         public ConfigurationManager ConfigurationManager { get; set; }
         public string Endpoint { get; set; }
@@ -54,9 +53,9 @@ namespace Ovh.Api
         public string ConsumerKey { get; set; }
         public int Timeout { get; set; }
 
-        private long EpochInseconds = (long)TimeSpan.FromTicks(new DateTime(1970, 1, 1).Ticks).TotalSeconds;
+        private static readonly long s_epochInseconds = (long)TimeSpan.FromTicks(new DateTime(1970, 1, 1).Ticks).TotalSeconds;
 
-        private bool isTimeDeltaInitialized = false;
+        private bool _isTimeDeltaInitialized = false;
         private long _timeDelta;
         /// <summary>
         /// Request signatures are valid only for a short amount of time to mitigate
@@ -70,10 +69,10 @@ namespace Ovh.Api
         {
             get
             {
-                if (!isTimeDeltaInitialized)
+                if (!_isTimeDeltaInitialized)
                 {
                     _timeDelta = ComputeTimeDelta();
-                    isTimeDeltaInitialized = true;
+                    _isTimeDeltaInitialized = true;
                 }
                 return _timeDelta;
             }
@@ -81,16 +80,16 @@ namespace Ovh.Api
 
         private Client()
         {
-            Endpoints.Add("ovh-eu", "https://eu.api.ovh.com/1.0/");
-            Endpoints.Add("ovh-ca", "https://ca.api.ovh.com/1.0/");
-            Endpoints.Add("kimsufi-eu", "https://eu.api.kimsufi.com/1.0/");
-            Endpoints.Add("kimsufi-ca", "https://ca.api.kimsufi.com/1.0/");
-            Endpoints.Add("soyoustart-eu", "https://eu.api.soyoustart.com/1.0/");
-            Endpoints.Add("soyoustart-ca", "https://ca.api.soyoustart.com/1.0/");
-            Endpoints.Add("runabove-ca", "https://api.runabove.com/1.0/");
+            _endpoints.Add("ovh-eu", "https://eu.api.ovh.com/1.0/");
+            _endpoints.Add("ovh-ca", "https://ca.api.ovh.com/1.0/");
+            _endpoints.Add("kimsufi-eu", "https://eu.api.kimsufi.com/1.0/");
+            _endpoints.Add("kimsufi-ca", "https://ca.api.kimsufi.com/1.0/");
+            _endpoints.Add("soyoustart-eu", "https://eu.api.soyoustart.com/1.0/");
+            _endpoints.Add("soyoustart-ca", "https://ca.api.soyoustart.com/1.0/");
+            _endpoints.Add("runabove-ca", "https://api.runabove.com/1.0/");
 
-            WebClient = new WebClient();
-            WebClient.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
+            _webClient = new WebClient();
+            _webClient.CachePolicy = new RequestCachePolicy(RequestCacheLevel.BypassCache);
         }
 
         /// <summary>
@@ -110,30 +109,30 @@ namespace Ovh.Api
         /// <param name="readTimeout">Connection and read timeout for each request</param>
         /// <param name="writeTimeout"></param>
         public Client(string endpoint = null, string applicationKey = null,
-            string applicationSecret = null, string consumerKey = null, 
-            int timeout = DefaultTimeout) : this()
+            string applicationSecret = null, string consumerKey = null,
+            int timeout = _defaultTimeout) : this()
         {
             ConfigurationManager = new ConfigurationManager();
 
             //Endpoint
-            if (String.IsNullOrWhiteSpace(endpoint))
+            if (string.IsNullOrWhiteSpace(endpoint))
             {
                 endpoint = ConfigurationManager.Get("default", "endpoint");
             }
 
             try
             {
-                Endpoint = Endpoints[endpoint];
-                WebClient.BaseAddress = Endpoint;
+                Endpoint = _endpoints[endpoint];
+                _webClient.BaseAddress = Endpoint;
             }
             catch (KeyNotFoundException)
             {
-                throw new InvalidRegionException(String.Format("Unknow endpoint {0}. Valid endpoints: {1}",
-                    endpoint, String.Join(",", Endpoints.Keys)));
+                throw new InvalidRegionException(string.Format("Unknow endpoint {0}. Valid endpoints: {1}",
+                    endpoint, string.Join(",", _endpoints.Keys)));
             }
 
             //ApplicationKey
-            if (String.IsNullOrWhiteSpace(applicationKey))
+            if (string.IsNullOrWhiteSpace(applicationKey))
             {
                 string tempApplicationKey = "";
                 if(ConfigurationManager.TryGet(
@@ -148,7 +147,7 @@ namespace Ovh.Api
             }
 
             //SecretKey
-            if (String.IsNullOrWhiteSpace(applicationSecret))
+            if (string.IsNullOrWhiteSpace(applicationSecret))
             {
                 string tempAppSecret = "";
                 if (ConfigurationManager.TryGet(
@@ -163,7 +162,7 @@ namespace Ovh.Api
             }
 
             //ConsumerKey
-            if (String.IsNullOrWhiteSpace(consumerKey))
+            if (string.IsNullOrWhiteSpace(consumerKey))
             {
                 string tempConsumerKey = "";
                 if (ConfigurationManager.TryGet(
@@ -355,7 +354,7 @@ namespace Ovh.Api
         /// <typeparam name="Y">Input type</typeparam>
         /// <param name="target">API method to call</param>
         /// <param name="data">Json data to send as body</param>
-        /// <param name="needAuth">If true, send authentication headers</param>    
+        /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
         public T Put<T, Y>(string target, Y data, bool needAuth = true)
             where Y : class
@@ -443,7 +442,7 @@ namespace Ovh.Api
 
                 SHA1Managed sha1Hasher = new SHA1Managed();
                 string toSign =
-                    String.Join("+", ApplicationSecret, ConsumerKey, method,
+                    string.Join("+", ApplicationSecret, ConsumerKey, method,
                         target, data, currentServerTimestamp);
                 byte[] binaryHash = sha1Hasher.ComputeHash(Encoding.UTF8.GetBytes(toSign));
                 string signature = string.Join("",
@@ -458,14 +457,14 @@ namespace Ovh.Api
             try
             {
                 //NOTE: would be better to reuse some headers
-                WebClient.Headers = headers;
+                _webClient.Headers = headers;
                 if (method != "GET")
                 {
-                    response = WebClient.UploadString(path, method, data ?? "");
+                    response = _webClient.UploadString(path, method, data ?? "");
                 }
                 else
                 {
-                    response = WebClient.DownloadString(path);
+                    response = _webClient.DownloadString(path);
                 }
             }
             catch (WebException ex)
@@ -485,7 +484,7 @@ namespace Ovh.Api
             return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth));
         }
 
-        private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true) 
+        private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true)
             where Y : class
         {
             return JsonConvert.DeserializeObject<T>(Call(method, path, JsonConvert.SerializeObject(data), needAuth));

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace Ovh.Api
 {
@@ -64,7 +63,7 @@ namespace Ovh.Api
             }
         }
 
-        public ConfigurationManager(string endpoint, string applicationKey = null, 
+        public ConfigurationManager(string endpoint, string applicationKey = null,
             string applicationSecret = null, string consumerKey = null)
         {
             Config = new IniData();
@@ -115,7 +114,7 @@ namespace Ovh.Api
             if (sectionData == null)
             {
                 throw new ConfigurationKeyMissingException(
-                    String.Format("Could not find configuration section {0}",
+                    string.Format("Could not find configuration section {0}",
                         section));
             }
 
@@ -123,7 +122,7 @@ namespace Ovh.Api
             if (value == null)
             {
                 throw new ConfigurationKeyMissingException(
-                    String.Format("Could not find configuration key {0} in section {1}",
+                    string.Format("Could not find configuration key {0} in section {1}",
                         name, section));
             }
             return value;

@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "csharp-ovh", "csharp-ovh\csharp-ovh.xproj", "{AA42BCD7-8E68-4F61-9C86-5C0B13E490FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "csharp-ovh-test-suite", "csharp-ovh-test-suite\csharp-ovh-test-suite.csproj", "{E6849313-A85D-432F-8B93-0CB5352D63AD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50CF4A03-2630-483D-9F3A-F36D5B039A8D}"
+	ProjectSection(SolutionItems) = preProject
+		csharp-ovh\global.json = csharp-ovh\global.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
