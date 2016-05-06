@@ -88,7 +88,6 @@ namespace Ovh.Api
             }
         }
 
-
         /// <summary>
         /// Load parameter "name" from configuration, respecting priority order.
         /// Most of the time, "section" will correspond to the current api
@@ -110,7 +109,7 @@ namespace Ovh.Api
                 return value;
             }
 
-            var sectionData = Config[section];
+            KeyDataCollection sectionData = Config[section];
             if (sectionData == null)
             {
                 throw new ConfigurationKeyMissingException(

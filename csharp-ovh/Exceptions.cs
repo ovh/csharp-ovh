@@ -17,7 +17,6 @@ namespace Ovh.Api.Exceptions
         { }
     }
 
-
     /// <summary>
     /// Raised when the request fails at a low level (DNS, network, ...)
     /// </summary>
@@ -192,8 +191,6 @@ namespace Ovh.Api.Exceptions
         { }
     }
 
-
-
     [Serializable]
     public class NotCredentialException : ApiException
     {
@@ -206,7 +203,6 @@ namespace Ovh.Api.Exceptions
         { }
     }
 
-
     [Serializable]
     public class ForbiddenException : ApiException
     {
@@ -218,7 +214,6 @@ namespace Ovh.Api.Exceptions
           System.Runtime.Serialization.StreamingContext context) : base(info, context)
         { }
     }
-
 
     [Serializable]
     public class ConfigurationKeyMissingException : ApiException

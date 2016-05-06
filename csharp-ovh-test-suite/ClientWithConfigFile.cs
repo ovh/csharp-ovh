@@ -69,7 +69,7 @@ namespace csharp_ovh_test_suite
             CreateConfigFileWithEndpointOnly();
             Client client = new Client();
             Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
-            var a = client.TimeDelta;
+            long a = client.TimeDelta;
         }
 
         [TestMethod]
@@ -81,7 +81,7 @@ namespace csharp_ovh_test_suite
             Assert.AreEqual(client.ApplicationKey, "my_app_key");
             Assert.AreEqual(client.ApplicationSecret, "my_application_secret");
             Assert.AreEqual(client.ConsumerKey, "my_consumer_key");
-            var a = client.TimeDelta;
+            long a = client.TimeDelta;
         }
     }
 }

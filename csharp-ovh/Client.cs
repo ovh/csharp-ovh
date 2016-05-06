@@ -4,6 +4,7 @@ using Ovh.Api.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Cache;
@@ -210,7 +211,6 @@ namespace Ovh.Api
             target = PrepareGetTarget(target, kwargs);
             return Call("GET", target, null, needAuth);
         }
-
 
         /// <summary>
         /// Issues a POST call with an expected return type
@@ -562,7 +562,7 @@ namespace Ovh.Api
 
         private JObject ExtractResponseObject(HttpWebResponse httpResponse)
         {
-            var dataStream = httpResponse.GetResponseStream();
+            Stream dataStream = httpResponse.GetResponseStream();
             int dataLength = (int)dataStream.Length;
             byte[] dataBuffer = new byte[dataLength];
             dataStream.Read(dataBuffer, 0, dataLength);
