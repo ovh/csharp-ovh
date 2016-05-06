@@ -1,4 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ovh.Api;
 using Ovh.Api.Exceptions;
 using System;
@@ -37,83 +41,6 @@ namespace csharp_ovh_test_suite
             {
                 File.Delete(".ovh.conf");
             }
-        }
-
-        [TestMethod]
-        public void GetWithResultAsString()
-        {
-            Client client = new Client();
-            client.Get("/me/sshKey/testKey");
-        }
-
-        [TestMethod]
-        public void GetWithResultAsT()
-        {
-            Client client = new Client();
-            OvhSSHKey key = client.Get<OvhSSHKey>("/me/sshKey/" + TestKeyName);
-        }
-
-        [TestMethod]
-        public void PostWithResultAsString()
-        {
-            Client client = new Client();
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("key", TestKeyValue);
-            parameters.Add("keyName", TestKeyName);
-            string result = client.Post("/me/sshKey", parameters);
-        }
-
-        [TestMethod]
-        public void PostWithResultAsT()
-        {
-            Client client = new Client();
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("key", TestKeyValue);
-            parameters.Add("keyName", TestKeyName);
-            string result = client.Post<string>("/me/sshKey", parameters);
-        }
-
-        [TestMethod]
-        public void PutWithResultAsT()
-        {
-            Client client = new Client();
-            Dictionary<string, bool> parameters = new Dictionary<string, bool>();
-            parameters.Add("default", true);
-            object result = client.Put<object>("/me/sshKey/testKey", parameters);
-        }
-
-        [TestMethod]
-        public void PutWithResultAsString()
-        {
-            Client client = new Client();
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("default", "false");
-            string result = client.Put("/me/sshKey/testKey", parameters);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ResourceConflictException))]
-        public void PostThatConflicts()
-        {
-            Client client = new Client();
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("key", TestKeyValue);
-            parameters.Add("keyName", TestKeyName);
-            string result = client.Post("/me/sshKey", parameters);
-        }
-
-        [TestMethod]
-        public void DeleteWithResultAsString()
-        {
-            Client client = new Client();
-            string result = client.Delete("/me/sshKey/testKey");
-        }
-
-        [TestMethod]
-        public void DeleteWithResultAsT()
-        {
-            Client client = new Client();
-            object result = client.Delete<object>("/me/sshKey/testKey");
         }
     }
 }

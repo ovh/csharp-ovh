@@ -280,6 +280,21 @@ namespace Ovh.Api
         {
             return Call<T>("POST", target, data, needAuth);
         }
+
+        /// <summary>
+        /// Issues a POST call
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <typeparam name="Y">Input type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="data">Json data to send as body</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
+        public T Post<T, Y>(string target, Y data, bool needAuth = true)
+            where Y : class
+        {
+            return Call<T, Y>("POST", target, data, needAuth);
+        }
         #endregion
 
         #region PUT
@@ -331,6 +346,21 @@ namespace Ovh.Api
         public T Put<T>(string target, string data, bool needAuth = true)
         {
             return Call<T>("PUT", target, data, needAuth);
+        }
+
+        /// <summary>
+        /// Issues a POST call
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <typeparam name="Y">Input type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="data">Json data to send as body</param>
+        /// <param name="needAuth">If true, send authentication headers</param>    
+        /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
+        public T Put<T, Y>(string target, Y data, bool needAuth = true)
+            where Y : class
+        {
+            return Call<T, Y>("PUT", target, data, needAuth);
         }
         #endregion PUT
 
@@ -453,6 +483,12 @@ namespace Ovh.Api
         private T Call<T>(string method, string path, string data = null, bool needAuth = true)
         {
             return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth));
+        }
+
+        private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true) 
+            where Y : class
+        {
+            return JsonConvert.DeserializeObject<T>(Call(method, path, JsonConvert.SerializeObject(data), needAuth));
         }
 
         private void HandleHttpError(HttpWebResponse httpResponse, Exception ex)

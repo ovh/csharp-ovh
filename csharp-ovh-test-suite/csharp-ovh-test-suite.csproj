@@ -36,12 +36,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="csharp-ovh, Version=0.9.9.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\csharp-ovh.0.9.9\lib\net451\csharp-ovh.dll</HintPath>
+    <Reference Include="csharp-ovh, Version=0.9.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\csharp-ovh.0.9.10\lib\net451\csharp-ovh.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="INIFileParser, Version=2.2.4.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
-      <HintPath>..\csharp-ovh\packages\ini-parser.2.2.4\lib\net20\INIFileParser.dll</HintPath>
+      <HintPath>..\packages\ini-parser.2.2.4\lib\net20\INIFileParser.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -49,7 +49,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\csharp-ovh\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -67,7 +67,6 @@
     <Compile Include="ClientWithConfigFile.cs" />
     <Compile Include="ClientWithEnvironmentParams.cs" />
     <Compile Include="ClientWithtManualParams.cs" />
-    <Compile Include="OvhSSHKey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

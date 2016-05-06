@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("chsarp_ovh")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Simple wrapper around OVH's Api mechanisms")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("OVH")]
 [assembly: AssemblyProduct("chsarp_ovh")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
