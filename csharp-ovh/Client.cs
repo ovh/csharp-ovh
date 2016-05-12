@@ -1,4 +1,32 @@
-﻿using Newtonsoft.Json;
+﻿//Copyright(c) 2013-2016, OVH SAS.
+//All rights reserved.
+
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions are met:
+
+//  * Redistributions of source code must retain the above copyright
+//   notice, this list of conditions and the following disclaimer.
+
+// * Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimer in the
+//   documentation and/or other materials provided with the distribution.
+
+// * Neither the name of OVH SAS nor the
+//   names of its contributors may be used to endorse or promote products
+//   derived from this software without specific prior written permission.
+
+//THIS SOFTWARE IS PROVIDED BY OVH SAS AND CONTRIBUTORS ``AS IS'' AND ANY
+//EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+//WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+//DISCLAIMED.IN NO EVENT SHALL OVH SAS AND CONTRIBUTORS BE LIABLE FOR ANY
+//DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+//LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+//ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Ovh.Api.Exceptions;
 using System;
@@ -30,9 +58,9 @@ namespace Ovh.Api
     /// Example usage:
     ///     from ovh import Client, APIError
     ///     REGION = 'ovh-eu'
-    ///     APP_KEY= "<application key>"
-    ///     APP_SECRET= "<application secret key>"
-    ///     CONSUMER_KEY= "<consumer key>"
+    ///     APP_KEY= "&lt;application key&gt;"
+    ///     APP_SECRET= "&lt;application secret key&gt;"
+    ///     CONSUMER_KEY= "&lt;consumer key&gt;>"
     ///     client = Client(REGION, APP_KEY, APP_SECRET, CONSUMER_KEY)
     ///     try:
     ///         print client.get('/me')
@@ -45,18 +73,34 @@ namespace Ovh.Api
             new Dictionary<string, string>();
 
         private const int _defaultTimeout = 180;
-        private WebClient _webClient;
+        private readonly WebClient _webClient;
 
+        /// <summary>
+        /// Configuration manager used by this <c>Client</c>
+        /// </summary>
         public ConfigurationManager ConfigurationManager { get; set; }
+        /// <summary>
+        /// API Endpoint that this <c>Client</c> targets
+        /// </summary>
         public string Endpoint { get; set; }
+        /// <summary>
+        /// API application Key
+        /// </summary>
         public string ApplicationKey { get; set; }
+        /// <summary>
+        /// API application secret
+        /// </summary>
         public string ApplicationSecret { get; set; }
+        /// <summary>
+        /// Consumer key that can be either <see cref="RequestConsumerKey">generated</see> or passed to the <see cref="ConfigurationManager">configuration manager</see>>
+        /// </summary>
         public string ConsumerKey { get; set; }
+        /// <summary>
+        /// HTTP operations timeout
+        /// </summary>
         public int Timeout { get; set; }
 
-        private static readonly long s_epochInseconds = (long)TimeSpan.FromTicks(new DateTime(1970, 1, 1).Ticks).TotalSeconds;
-
-        private bool _isTimeDeltaInitialized = false;
+        private bool _isTimeDeltaInitialized;
         private long _timeDelta;
         /// <summary>
         /// Request signatures are valid only for a short amount of time to mitigate
@@ -107,8 +151,7 @@ namespace Ovh.Api
         /// <param name="applicationKey">Application key as provided by OVH</param>
         /// <param name="applicationSecret">Application secret key as provided by OVH</param>
         /// <param name="consumerKey">User token as provided by OVH</param>
-        /// <param name="readTimeout">Connection and read timeout for each request</param>
-        /// <param name="writeTimeout"></param>
+        /// <param name="timeout">Connection timeout for each request</param>
         public Client(string endpoint = null, string applicationKey = null,
             string applicationSecret = null, string consumerKey = null,
             int timeout = _defaultTimeout) : this()
@@ -128,14 +171,14 @@ namespace Ovh.Api
             }
             catch (KeyNotFoundException)
             {
-                throw new InvalidRegionException(string.Format("Unknow endpoint {0}. Valid endpoints: {1}",
-                    endpoint, string.Join(",", _endpoints.Keys)));
+                throw new InvalidRegionException(
+                    $"Unknow endpoint {endpoint}. Valid endpoints: {string.Join(",", _endpoints.Keys)}");
             }
 
             //ApplicationKey
             if (string.IsNullOrWhiteSpace(applicationKey))
             {
-                string tempApplicationKey = "";
+                string tempApplicationKey;
                 if(ConfigurationManager.TryGet(
                     endpoint, "application_key", out tempApplicationKey))
                 {
@@ -150,7 +193,7 @@ namespace Ovh.Api
             //SecretKey
             if (string.IsNullOrWhiteSpace(applicationSecret))
             {
-                string tempAppSecret = "";
+                string tempAppSecret;
                 if (ConfigurationManager.TryGet(
                     endpoint, "application_secret", out tempAppSecret))
                 {
@@ -165,7 +208,7 @@ namespace Ovh.Api
             //ConsumerKey
             if (string.IsNullOrWhiteSpace(consumerKey))
             {
-                string tempConsumerKey = "";
+                string tempConsumerKey;
                 if (ConfigurationManager.TryGet(
                     endpoint, "consumer_key", out tempConsumerKey))
                 {
@@ -389,9 +432,15 @@ namespace Ovh.Api
 
         #endregion
 
-        public CredentialRequestResult RequestConsumerKey(CredentialRequest request)
+
+        /// <summary>
+        /// Generates a <c>ConsumerKey</c> request
+        /// </summary>
+        /// <param name="credentialRequest">The exact request to issue</param>
+        /// <returns>A result with the confirmation URL returned by the API</returns>
+        public CredentialRequestResult RequestConsumerKey(CredentialRequest credentialRequest)
         {
-            return Post<CredentialRequestResult>("/auth/credential", request, false);
+            return Post<CredentialRequestResult>("/auth/credential", credentialRequest, false);
         }
 
         /// <summary>
@@ -469,12 +518,14 @@ namespace Ovh.Api
             }
             catch (WebException ex)
             {
-                HttpWebResponse httpResponse = (HttpWebResponse)ex.Response;
-                if (httpResponse == null)
+                using (HttpWebResponse httpResponse = (HttpWebResponse)ex.Response)
                 {
-                    throw new HttpException("Low HTTP request failed error", ex);
+                    if (httpResponse == null)
+                    {
+                        throw new HttpException("Low HTTP request failed error", ex);
+                    }
+                    HandleHttpError(httpResponse, ex);
                 }
-                HandleHttpError(httpResponse, ex);
             }
             return response;
         }
@@ -557,7 +608,6 @@ namespace Ovh.Api
                 default:
                     throw new ApiException(message);
             }
-            throw new HttpException("Low Http request failed", ex);
         }
 
         private JObject ExtractResponseObject(HttpWebResponse httpResponse)

@@ -5,10 +5,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ovh.Api;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace csharp_ovh_test_suite
 {

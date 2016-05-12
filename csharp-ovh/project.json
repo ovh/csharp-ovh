@@ -1,10 +1,10 @@
 {
-  "version": "0.9.12-*",
+  "version": "1.0.0-*",
   "description": "chsarp-ovh Class Library",
   "authors": [ "Luke Marlin" ],
   "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+  "projectUrl": "https://github.com/ovh/csharp-ovh",
+  "licenseUrl": "https://github.com/ovh/csharp-ovh/blob/master/LICENSE",
   "frameworks": {
     "net451": {
       "dependencies": {
