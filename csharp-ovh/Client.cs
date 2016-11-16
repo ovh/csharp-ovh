@@ -29,6 +29,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Ovh.Api.Exceptions;
+using Ovh.Api.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -226,23 +227,6 @@ namespace Ovh.Api
         }
 
         #region GET
-
-        /// <summary>
-        /// Append arguments to the target URL
-        /// </summary>
-        /// <param name="target">Target URL</param>
-        /// <param name="kwargs">Key value arguments to append</param>
-        /// <returns>Url suffixed with kwargs</returns>
-        private string PrepareGetTarget(string target, NameValueCollection kwargs)
-        {
-            if (kwargs != null)
-            {
-                target += kwargs.ToString();
-            }
-
-            return target;
-        }
-
         /// <summary>
         /// Issues a GET call
         /// </summary>
@@ -252,7 +236,7 @@ namespace Ovh.Api
         /// <returns>Raw API response</returns>
         public string Get(string target, NameValueCollection kwargs = null, bool needAuth = true)
         {
-            target = PrepareGetTarget(target, kwargs);
+            target += kwargs?.ToString();
             return Call("GET", target, null, needAuth);
         }
 
@@ -266,7 +250,7 @@ namespace Ovh.Api
         /// <returns>API response deserialized to T by JSON.Net</returns>
         public T Get<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
         {
-            target = PrepareGetTarget(target, kwargs);
+            target += kwargs?.ToString();
             return Call<T>("GET", target, null, needAuth);
         }
 
