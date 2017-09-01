@@ -68,7 +68,7 @@ secret (AS)**.
 *****************************
 
 The easiest and safest way to use your application's credentials is to create a
-``ovh.conf`` configuration file in application's working directory. Here is how
+``.ovh.conf`` configuration file in application's working directory. Here is how
 it looks like:
 
 .. code:: ini
@@ -97,7 +97,7 @@ Depending on the API you want to use, you may set the ``endpoint`` to:
 
 See Configuration_ for more information on available configuration mechanisms.
 
-.. note:: When using a versioning system, make sure to add ``ovh.conf`` to ignored
+.. note:: When using a versioning system, make sure to add ``.ovh.conf`` to ignored
           files. It contains confidential/security-sensitive informations!
 
 3. Authorize your application to access a customer account
@@ -405,7 +405,7 @@ provided, it will look for a configuration file of the form:
 
 The client will successively attempt to locate this configuration file in
 
-1. Current working directory: ``./ovh.conf``
+1. Current working directory: ``./.ovh.conf``
 2. Current user's home directory ``%USERPROFILE%/.ovh.conf``
 
 This lookup mechanism makes it easy to overload credentials for a specific
