@@ -1,23 +1,19 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ovh.Api;
 using System;
+using NUnit.Framework;
 
-namespace csharp_ovh_test_suite
+namespace Ovh.Test
 {
-    [TestClass]
+    [TestFixture]
     public class ClientWithEnvironmentParams
     {
-        [TestInitialize]
+        [SetUp]
         public void AddEnpointToEnv()
         {
             Environment.SetEnvironmentVariable("OVH_ENDPOINT", "ovh-eu", EnvironmentVariableTarget.Process);
         }
 
-        [TestCleanup]
+        [TearDown]
         public void RemoveEnvVariables()
         {
             Environment.SetEnvironmentVariable("OVH_ENDPOINT", null, EnvironmentVariableTarget.Process);
@@ -33,7 +29,7 @@ namespace csharp_ovh_test_suite
             Environment.SetEnvironmentVariable("OVH_CONSUMER_KEY", "my_consumer_key", EnvironmentVariableTarget.Process);
         }
 
-        [TestMethod]
+        [Test]
         public void ValidEndpoint()
         {
             Client client = new Client();
@@ -41,7 +37,7 @@ namespace csharp_ovh_test_suite
             long a = client.TimeDelta;
         }
 
-        [TestMethod]
+        [Test]
         public void AllParams()
         {
             AddOtherParamsToEnv();
@@ -54,3 +50,4 @@ namespace csharp_ovh_test_suite
         }
     }
 }
+
