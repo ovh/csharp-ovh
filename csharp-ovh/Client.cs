@@ -612,12 +612,8 @@ namespace Ovh.Api
 
         private JObject ExtractResponseObject(HttpWebResponse httpResponse)
         {
-            Stream dataStream = httpResponse.GetResponseStream();
-            int dataLength = (int)dataStream.Length;
-            byte[] dataBuffer = new byte[dataLength];
-            dataStream.Read(dataBuffer, 0, dataLength);
-            dataStream.Close();
-            string dataString = Encoding.UTF8.GetString(dataBuffer);
+            var dataStream = new StreamReader(httpResponse.GetResponseStream());
+            string dataString = dataStream.ReadToEnd();
             JObject responseObject = JsonConvert.DeserializeObject<JObject>(dataString);
             return responseObject;
         }
