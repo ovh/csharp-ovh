@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/ovh/csharp-ovh.svg?branch=master
+    :target: https://travis-ci.org/ovh/csharp-ovh
+
 Lightweight wrapper around OVH's APIs. Handles all the hard work including
 credential creation and requests signing.
 

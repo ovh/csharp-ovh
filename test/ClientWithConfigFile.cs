@@ -1,21 +1,17 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using IniParser.Exceptions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ovh.Api;
 using System;
 using System.IO;
+using IniParser.Exceptions;
+using NUnit.Framework;
+using Ovh.Api;
 
-namespace csharp_ovh_test_suite
+namespace Ovh.Test
 {
-    [TestClass]
+    [TestFixture]
     public class ClientWithConfigFile
     {
         public const string OvhConfigFile = ".ovh.conf";
 
-        [TestCleanup]
+        [TearDown]
         public void RemoveConfigFile()
         {
             if (File.Exists(OvhConfigFile))
@@ -51,15 +47,14 @@ namespace csharp_ovh_test_suite
                 "");
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ParsingException))]
+        [Test]
         public void InvalidConfigFile()
         {
             CreateInvalidConfigFile();
-            Client client = new Client();
+            Assert.Throws<ParsingException>(() => new Client());
         }
 
-        [TestMethod]
+        [Test]
         public void ValidConfigFileWithEndpointOnly()
         {
             CreateConfigFileWithEndpointOnly();
@@ -68,7 +63,7 @@ namespace csharp_ovh_test_suite
             long a = client.TimeDelta;
         }
 
-        [TestMethod]
+        [Test]
         public void ValidConfigFileWithAllValues()
         {
             CreateConfigFileWithAllValues();

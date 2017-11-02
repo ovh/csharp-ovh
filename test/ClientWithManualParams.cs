@@ -1,31 +1,26 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using Ovh.Api;
 using Ovh.Api.Exceptions;
 
-namespace csharp_ovh_test_suite
+namespace Ovh.Test
 {
-    [TestClass]
+    [TestFixture]
     public class ClientWithtManualParams
     {
-        [TestMethod]
-        [ExpectedException(typeof(ConfigurationKeyMissingException))]
+        [Test]
         public void NoParamsThrowsConfigurationKeyMissingException()
         {
-            Client client = new Client();
+            Assert.Throws<ConfigurationKeyMissingException>(() => new Client());
         }
 
-        [TestMethod]
+        [Test]
         public void ValidEndpointParam()
         {
             Client client = new Client("ovh-eu");
             Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
         }
 
-        [TestMethod]
+        [Test]
         public void ValidParams()
         {
             Client client =
@@ -34,11 +29,11 @@ namespace csharp_ovh_test_suite
             Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidRegionException))]
+        [Test]
         public void InvalidEndpointParamThrowsInvalidRegionException()
         {
-            Client client = new Client("ovh-noWhere");
+            Assert.Throws<InvalidRegionException>(() => new Client("ovh-noWhere"));
         }
     }
 }
+
