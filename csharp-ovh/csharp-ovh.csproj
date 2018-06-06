@@ -1,13 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>csharp-ovh</AssemblyName>
-    <Version>2.0.0</Version>
+    <Version>3.0.0</Version>
     <Authors>Luke Marlin</Authors>
     <Company>OVH</Company>
     <Description>Csharp-OVH Class Library</Description>
-
   </PropertyGroup>
 
   <ItemGroup>
