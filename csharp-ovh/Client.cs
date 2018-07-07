@@ -174,7 +174,7 @@ namespace Ovh.Api
             catch (KeyNotFoundException)
             {
                 throw new InvalidRegionException(
-                    $"Unknow endpoint {endpoint}. Valid endpoints: {string.Join(",", _endpoints.Keys)}");
+                    $"Unknown endpoint {endpoint}. Valid endpoints: {string.Join(",", _endpoints.Keys)}");
             }
 
             //ApplicationKey
@@ -404,6 +404,39 @@ namespace Ovh.Api
                 path = path.Substring(1);
             }
             string target = Endpoint + path;
+            WebHeaderCollection headers = GetHeaders(method, data, needAuth, target);
+
+            string response = "";
+
+            try
+            {
+                //NOTE: would be better to reuse some headers
+                _webClient.Headers = headers;
+                if (method != "GET")
+                {
+                    response = _webClient.UploadString(path, method, data ?? "");
+                }
+                else
+                {
+                    response = _webClient.DownloadString(path);
+                }
+            }
+            catch (WebException ex)
+            {
+                using (HttpWebResponse httpResponse = (HttpWebResponse)ex.Response)
+                {
+                    if (httpResponse == null)
+                    {
+                        throw new HttpException("Low HTTP request failed error", ex);
+                    }
+                    HandleHttpError(httpResponse, ex);
+                }
+            }
+            return response;
+        }
+
+        private WebHeaderCollection GetHeaders(string method, string data, bool needAuth, string target)
+        {
             WebHeaderCollection headers = new WebHeaderCollection();
             headers.Add("X-Ovh-Application", ApplicationKey);
 
@@ -438,33 +471,9 @@ namespace Ovh.Api
                 headers.Add("X-Ovh-Signature", "$1$" + signature);
             }
 
-            string response = "";
-            try
-            {
-                //NOTE: would be better to reuse some headers
-                _webClient.Headers = headers;
-                if (method != "GET")
-                {
-                    response = _webClient.UploadString(path, method, data ?? "");
-                }
-                else
-                {
-                    response = _webClient.DownloadString(path);
-                }
-            }
-            catch (WebException ex)
-            {
-                using (HttpWebResponse httpResponse = (HttpWebResponse)ex.Response)
-                {
-                    if (httpResponse == null)
-                    {
-                        throw new HttpException("Low HTTP request failed error", ex);
-                    }
-                    HandleHttpError(httpResponse, ex);
-                }
-            }
-            return response;
+            return headers;
         }
+
 
         private T Call<T>(string method, string path, string data = null, bool needAuth = true)
         {
