@@ -39,6 +39,7 @@ using System.Net;
 using System.Net.Cache;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Ovh.Api
 {
@@ -254,6 +255,33 @@ namespace Ovh.Api
             return Call<T>("GET", target, null, needAuth);
         }
 
+        /// <summary>
+        /// Issues an aync GET call
+        /// </summary>
+        /// <param name="target">API method to call</param>
+        /// <param name="kwargs">Arguments to append to URL</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>Raw API response</returns>
+        public Task<string> GetAsync(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        {
+            target += kwargs?.ToString();
+            return CallAsync("GET", target, null, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an async GET call with an expected return type
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="kwargs">Arguments to append to URL</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>API response deserialized to T by JSON.Net</returns>
+        public Task<T> GetAsync<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        {
+            target += kwargs?.ToString();
+            return CallAsync<T>("GET", target, null, needAuth);
+        }
+
         #endregion
 
         #region POST
@@ -296,6 +324,46 @@ namespace Ovh.Api
             where Y : class
         {
             return Call<T, Y>("POST", target, data, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an async POST call
+        /// </summary>
+        /// <param name="target">API method to call</param>
+        /// <param name="data">Json data to send as body</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>Raw API response</returns>
+        public Task<string> PostAsync(string target, string data, bool needAuth = true)
+        {
+            return CallAsync("POST", target, data, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an async POST call
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="data">Json data to send as body</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>API response deserialized to T by JSON.Net</returns>
+        public Task<T> PostAsync<T>(string target, string data, bool needAuth = true)
+        {
+            return CallAsync<T>("POST", target, data, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an aync POST call
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <typeparam name="Y">Input type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="data">Json data to send as body</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
+        public Task<T> PostAsync<T, Y>(string target, Y data, bool needAuth = true)
+            where Y : class
+        {
+            return CallAsync<T, Y>("POST", target, data, needAuth);
         }
         #endregion
 
@@ -340,6 +408,45 @@ namespace Ovh.Api
             return Call<T, Y>("PUT", target, data, needAuth);
         }
 
+        /// <summary>
+        /// Issues an async PUT call
+        /// </summary>
+        /// <param name="target">API method to call</param>
+        /// <param name="data">Json data to send as body</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>Raw API response</returns>
+        public Task<string> PutAsync(string target, string data, bool needAuth = true)
+        {
+            return CallAsync("PUT", target, data, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an async PUT call
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="data">Json data to send as body</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>API response deserialized to T by JSON.Net</returns>
+        public Task<T> PutAsync<T>(string target, string data, bool needAuth = true)
+        {
+            return CallAsync<T>("PUT", target, data, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an async PUT call
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <typeparam name="Y">Input type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="data">Json data to send as body</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
+        public Task<T> PutAsync<T, Y>(string target, Y data, bool needAuth = true)
+            where Y : class
+        {
+            return CallAsync<T, Y>("PUT", target, data, needAuth);
+        }
         #endregion PUT
 
         #region DELETE
@@ -366,6 +473,29 @@ namespace Ovh.Api
             return Call<T>("DELETE", target, null, needAuth);
         }
 
+        /// <summary>
+        /// Issues an async DELETE call
+        /// </summary>
+        /// <param name="target">API method to call</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>Raw API response</returns>
+        public Task<string> DeleteAsync(string target, bool needAuth = true)
+        {
+            return CallAsync("DELETE", target, null, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an async DELETE call
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>API response deserialized to T by JSON.Net</returns>
+        public Task<T> DeleteAsync<T>(string target, bool needAuth = true)
+        {
+            return CallAsync<T>("DELETE", target, null, needAuth);
+        }
+
         #endregion
 
 
@@ -377,62 +507,6 @@ namespace Ovh.Api
         public CredentialRequestResult RequestConsumerKey(CredentialRequest credentialRequest)
         {
             return Post<CredentialRequestResult, CredentialRequest>("/auth/credential", credentialRequest, false);
-        }
-
-        /// <summary>
-        /// Lowest level call helper. If "consumerKey" is not "null", inject
-        /// authentication headers and sign the request.
-        /// Request signature is a sha1 hash on following fields, joined by '+'
-        ///  - application_secret
-        ///  - consumer_key
-        ///  - METHOD
-        ///  - full request url
-        ///  - body
-        ///  - server current time (takes time delta into account)
-        /// </summary>
-        /// <param name="method">HTTP verb. Usualy one of GET, POST, PUT, DELETE</param>
-        /// <param name="path">api entrypoint to call, relative to endpoint base path</param>
-        /// <param name="data">any json serializable data to send as request's body</param>
-        /// <param name="needAuth">if False, bypass signature</param>
-        /// <exception cref="HttpException">When underlying request failed for network reason</exception>
-        /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
-        private string Call(string method, string path, string data = null, bool needAuth = true)
-        {
-            method = method.ToUpper();
-            if (path.StartsWith("/"))
-            {
-                path = path.Substring(1);
-            }
-            string target = Endpoint + path;
-            WebHeaderCollection headers = GetHeaders(method, data, needAuth, target);
-
-            string response = "";
-
-            try
-            {
-                //NOTE: would be better to reuse some headers
-                _webClient.Headers = headers;
-                if (method != "GET")
-                {
-                    response = _webClient.UploadString(path, method, data ?? "");
-                }
-                else
-                {
-                    response = _webClient.DownloadString(path);
-                }
-            }
-            catch (WebException ex)
-            {
-                using (HttpWebResponse httpResponse = (HttpWebResponse)ex.Response)
-                {
-                    if (httpResponse == null)
-                    {
-                        throw new HttpException("Low HTTP request failed error", ex);
-                    }
-                    HandleHttpError(httpResponse, ex);
-                }
-            }
-            return response;
         }
 
         private WebHeaderCollection GetHeaders(string method, string data, bool needAuth, string target)
@@ -474,19 +548,144 @@ namespace Ovh.Api
             return headers;
         }
 
+        #region Call
+
+        /// <summary>
+        /// Lowest level call helper. If "consumerKey" is not "null", inject
+        /// authentication headers and sign the request.
+        /// Request signature is a sha1 hash on following fields, joined by '+'
+        ///  - application_secret
+        ///  - consumer_key
+        ///  - METHOD
+        ///  - full request url
+        ///  - body
+        ///  - server current time (takes time delta into account)
+        /// </summary>
+        /// <param name="method">HTTP verb. Usualy one of GET, POST, PUT, DELETE</param>
+        /// <param name="path">api entrypoint to call, relative to endpoint base path</param>
+        /// <param name="data">any json serializable data to send as request's body</param>
+        /// <param name="needAuth">if False, bypass signature</param>
+        /// <exception cref="HttpException">When underlying request failed for network reason</exception>
+        /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
+        private string Call(string method, string path, string data = null, bool needAuth = true)
+        {
+            PrepareCall(ref method, ref path, data, needAuth);
+
+            try
+            {
+                if (method != "GET")
+                {
+                    return _webClient.UploadString(path, method, data ?? "");
+                }
+                else
+                {
+                    return _webClient.DownloadString(path);
+                }
+            }
+            catch(WebException ex)
+            {
+                throw HandleWebException(ex);
+            }
+        }
+
+        /// <summary>
+        /// Lowest level async call helper. If "consumerKey" is not "null", inject
+        /// authentication headers and sign the request.
+        /// Request signature is a sha1 hash on following fields, joined by '+'
+        ///  - application_secret
+        ///  - consumer_key
+        ///  - METHOD
+        ///  - full request url
+        ///  - body
+        ///  - server current time (takes time delta into account)
+        /// </summary>
+        /// <param name="method">HTTP verb. Usualy one of GET, POST, PUT, DELETE</param>
+        /// <param name="path">api entrypoint to call, relative to endpoint base path</param>
+        /// <param name="data">any json serializable data to send as request's body</param>
+        /// <param name="needAuth">if False, bypass signature</param>
+        /// <exception cref="HttpException">When underlying request failed for network reason</exception>
+        /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
+        private Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true)
+        {
+            PrepareCall(ref method, ref path, data, needAuth);
+
+            Task<string> responseTask = null;
+
+            if (method != "GET")
+            {
+                responseTask = _webClient.UploadStringTaskAsync(path, method, data ?? "");
+            }
+            else
+            {
+                responseTask = _webClient.DownloadStringTaskAsync(path);
+            }
+
+            return responseTask.ContinueWith((r) => CallAsyncError(r));
+
+            // Wrapper used so that we catch the exception ourselves
+            // and return something more useful to the user if we can
+            string CallAsyncError(Task<string> task)
+            {
+                try
+                {
+                    return task.Result;
+                }
+                catch (WebException ex)
+                {
+                    throw HandleWebException(ex);
+                }
+            }
+        }
+
+        private Exception HandleWebException(WebException ex)
+        {
+            using (HttpWebResponse httpResponse = (HttpWebResponse)ex.Response)
+            {
+                if (httpResponse == null)
+                {
+                    return new HttpException("Low HTTP request failed error", ex);
+                }
+                return ExtractExceptionFromHttpError(httpResponse, ex);
+            }
+        }
+
+        private void PrepareCall(ref string method, ref string path, string data, bool needAuth)
+        {
+            method = method.ToUpper();
+            if (path.StartsWith("/"))
+            {
+                path = path.Substring(1);
+            }
+            string target = Endpoint + path;
+            //NOTE: would be better to reuse some headers
+            _webClient.Headers = GetHeaders(method, data, needAuth, target);
+        }
 
         private T Call<T>(string method, string path, string data = null, bool needAuth = true)
         {
             return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth));
         }
 
+        private Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true)
+        {
+            return CallAsync(method, path, data, needAuth).ContinueWith((r) => JsonConvert.DeserializeObject<T>(r.Result));
+        }
+
         private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true)
             where Y : class
         {
-            return JsonConvert.DeserializeObject<T>(Call(method, path, JsonConvert.SerializeObject(data), needAuth));
+            return Call<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
+        }
+        
+        private Task<T> CallAsync<T, Y>(string method, string path, Y data = null, bool needAuth = true)
+            where Y : class
+        {
+            return CallAsync<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
         }
 
-        private void HandleHttpError(HttpWebResponse httpResponse, Exception ex)
+        #endregion
+
+        private Exception ExtractExceptionFromHttpError(HttpWebResponse httpResponse, Exception ex)
         {
             JObject responseObject = ExtractResponseObject(httpResponse);
             string message = "";
@@ -515,43 +714,43 @@ namespace Ovh.Api
                 case HttpStatusCode.Forbidden:
                     if (errorCode == "NOT_GRANTED_CALL")
                     {
-                        throw new NotGrantedCallException(message);
+                        return new NotGrantedCallException(message);
                     }
                     else if (errorCode == "NOT_CREDENTIAL")
                     {
-                        throw new NotCredentialException(message);
+                       return new NotCredentialException(message);
                     }
                     else if (errorCode == "INVALID_KEY")
                     {
-                        throw new InvalidKeyException(message);
+                       return new InvalidKeyException(message);
                     }
                     else if (errorCode == "INVALID_CREDENTIAL")
                     {
-                        throw new InvalidCredentialException(message);
+                       return new InvalidCredentialException(message);
                     }
                     else if (errorCode == "FORBIDDEN")
                     {
-                        throw new ForbiddenException(message);
+                       return new ForbiddenException(message);
                     }
                     else
                     {
-                        throw new ApiException(message);
+                       return new ApiException(message);
                     }
                 case HttpStatusCode.NotFound:
                     throw new ResourceNotFoundException(message);
                 case HttpStatusCode.BadRequest:
                     if (errorCode == "QUERY_TIME_OUT")
                     {
-                        throw new StaleRequestException(message);
+                       return new StaleRequestException(message);
                     }
                     else
                     {
-                        throw new BadParametersException(message);
+                       return new BadParametersException(message);
                     }
                 case HttpStatusCode.Conflict:
-                    throw new ResourceConflictException(message);
+                   return new ResourceConflictException(message);
                 default:
-                    throw new ApiException(message);
+                    return new ApiException(message);
             }
         }
 
