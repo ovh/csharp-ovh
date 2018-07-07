@@ -29,6 +29,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Ovh.Api.Exceptions;
+using Ovh.Api.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -173,7 +174,7 @@ namespace Ovh.Api
             catch (KeyNotFoundException)
             {
                 throw new InvalidRegionException(
-                    $"Unknow endpoint {endpoint}. Valid endpoints: {string.Join(",", _endpoints.Keys)}");
+                    $"Unknown endpoint {endpoint}. Valid endpoints: {string.Join(",", _endpoints.Keys)}");
             }
 
             //ApplicationKey
@@ -226,25 +227,8 @@ namespace Ovh.Api
         }
 
         #region GET
-
         /// <summary>
-        /// Append arguments to the target URL
-        /// </summary>
-        /// <param name="target">Target URL</param>
-        /// <param name="kwargs">Key value arguments to append</param>
-        /// <returns>Url suffixed with kwargs</returns>
-        private string PrepareGetTarget(string target, NameValueCollection kwargs)
-        {
-            if (kwargs != null)
-            {
-                target += kwargs.ToString();
-            }
-
-            return target;
-        }
-
-        /// <summary>
-        /// Issues a POST call
+        /// Issues a GET call
         /// </summary>
         /// <param name="target">API method to call</param>
         /// <param name="kwargs">Arguments to append to URL</param>
@@ -252,12 +236,12 @@ namespace Ovh.Api
         /// <returns>Raw API response</returns>
         public string Get(string target, NameValueCollection kwargs = null, bool needAuth = true)
         {
-            target = PrepareGetTarget(target, kwargs);
+            target += kwargs?.ToString();
             return Call("GET", target, null, needAuth);
         }
 
         /// <summary>
-        /// Issues a POST call with an expected return type
+        /// Issues a GET call with an expected return type
         /// </summary>
         /// <typeparam name="T">Expected return type</typeparam>
         /// <param name="target">API method to call</param>
@@ -266,7 +250,7 @@ namespace Ovh.Api
         /// <returns>API response deserialized to T by JSON.Net</returns>
         public T Get<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
         {
-            target = PrepareGetTarget(target, kwargs);
+            target += kwargs?.ToString();
             return Call<T>("GET", target, null, needAuth);
         }
 
@@ -278,37 +262,12 @@ namespace Ovh.Api
         /// Issues a POST call
         /// </summary>
         /// <param name="target">API method to call</param>
-        /// <param name="data">Object to serialize and send as body</param>
-        /// <param name="needAuth">If true, send authentication headers</param>
-        /// <returns>Raw API response</returns>
-        public string Post(string target, object data, bool needAuth = true)
-        {
-            return Call("POST", target, JsonConvert.SerializeObject(data), needAuth);
-        }
-
-        /// <summary>
-        /// Issues a POST call
-        /// </summary>
-        /// <param name="target">API method to call</param>
         /// <param name="data">Json data to send as body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>Raw API response</returns>
         public string Post(string target, string data, bool needAuth = true)
         {
             return Call("POST", target, data, needAuth);
-        }
-
-        /// <summary>
-        /// Issues a POST call
-        /// </summary>
-        /// <typeparam name="T">Expected return type</typeparam>
-        /// <param name="target">API method to call</param>
-        /// <param name="data">Object to serialize and send as body</param>
-        /// <param name="needAuth">If true, send authentication headers</param>
-        /// <returns>API response deserialized to T by JSON.Net</returns>
-        public T Post<T>(string target, object data, bool needAuth = true)
-        {
-            return Call<T>("POST", target, JsonConvert.SerializeObject(data), needAuth);
         }
 
         /// <summary>
@@ -345,18 +304,6 @@ namespace Ovh.Api
         /// Issues a PUT call
         /// </summary>
         /// <param name="target">API method to call</param>
-        /// <param name="data">Object to serialize and send as body</param>
-        /// <param name="needAuth">If true, send authentication headers</param>
-        /// <returns>Raw API response</returns>
-        public string Put(string target, object data, bool needAuth = true)
-        {
-            return Call("PUT", target, JsonConvert.SerializeObject(data), needAuth);
-        }
-
-        /// <summary>
-        /// Issues a POST call
-        /// </summary>
-        /// <param name="target">API method to call</param>
         /// <param name="data">Json data to send as body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>Raw API response</returns>
@@ -366,20 +313,7 @@ namespace Ovh.Api
         }
 
         /// <summary>
-        /// Issues a POST call
-        /// </summary>
-        /// <typeparam name="T">Expected return type</typeparam>
-        /// <param name="target">API method to call</param>
-        /// <param name="data">Object to serialize and send as body</param>
-        /// <param name="needAuth">If true, send authentication headers</param>
-        /// <returns>API response deserialized to T by JSON.Net</returns>
-        public T Put<T>(string target, object data, bool needAuth = true)
-        {
-            return Call<T>("PUT", target, JsonConvert.SerializeObject(data), needAuth);
-        }
-
-        /// <summary>
-        /// Issues a POST call
+        /// Issues a PUT call
         /// </summary>
         /// <typeparam name="T">Expected return type</typeparam>
         /// <param name="target">API method to call</param>
@@ -392,7 +326,7 @@ namespace Ovh.Api
         }
 
         /// <summary>
-        /// Issues a POST call
+        /// Issues a PUT call
         /// </summary>
         /// <typeparam name="T">Expected return type</typeparam>
         /// <typeparam name="Y">Input type</typeparam>
@@ -405,6 +339,7 @@ namespace Ovh.Api
         {
             return Call<T, Y>("PUT", target, data, needAuth);
         }
+
         #endregion PUT
 
         #region DELETE
@@ -441,7 +376,7 @@ namespace Ovh.Api
         /// <returns>A result with the confirmation URL returned by the API</returns>
         public CredentialRequestResult RequestConsumerKey(CredentialRequest credentialRequest)
         {
-            return Post<CredentialRequestResult>("/auth/credential", credentialRequest, false);
+            return Post<CredentialRequestResult, CredentialRequest>("/auth/credential", credentialRequest, false);
         }
 
         /// <summary>
@@ -469,6 +404,39 @@ namespace Ovh.Api
                 path = path.Substring(1);
             }
             string target = Endpoint + path;
+            WebHeaderCollection headers = GetHeaders(method, data, needAuth, target);
+
+            string response = "";
+
+            try
+            {
+                //NOTE: would be better to reuse some headers
+                _webClient.Headers = headers;
+                if (method != "GET")
+                {
+                    response = _webClient.UploadString(path, method, data ?? "");
+                }
+                else
+                {
+                    response = _webClient.DownloadString(path);
+                }
+            }
+            catch (WebException ex)
+            {
+                using (HttpWebResponse httpResponse = (HttpWebResponse)ex.Response)
+                {
+                    if (httpResponse == null)
+                    {
+                        throw new HttpException("Low HTTP request failed error", ex);
+                    }
+                    HandleHttpError(httpResponse, ex);
+                }
+            }
+            return response;
+        }
+
+        private WebHeaderCollection GetHeaders(string method, string data, bool needAuth, string target)
+        {
             WebHeaderCollection headers = new WebHeaderCollection();
             headers.Add("X-Ovh-Application", ApplicationKey);
 
@@ -503,33 +471,9 @@ namespace Ovh.Api
                 headers.Add("X-Ovh-Signature", "$1$" + signature);
             }
 
-            string response = "";
-            try
-            {
-                //NOTE: would be better to reuse some headers
-                _webClient.Headers = headers;
-                if (method != "GET")
-                {
-                    response = _webClient.UploadString(path, method, data ?? "");
-                }
-                else
-                {
-                    response = _webClient.DownloadString(path);
-                }
-            }
-            catch (WebException ex)
-            {
-                using (HttpWebResponse httpResponse = (HttpWebResponse)ex.Response)
-                {
-                    if (httpResponse == null)
-                    {
-                        throw new HttpException("Low HTTP request failed error", ex);
-                    }
-                    HandleHttpError(httpResponse, ex);
-                }
-            }
-            return response;
+            return headers;
         }
+
 
         private T Call<T>(string method, string path, string data = null, bool needAuth = true)
         {

@@ -32,7 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Ovh.Api
+namespace Ovh.Api.Models
 {
     /// <summary>
     /// Class that represents the data to send to API /auth
