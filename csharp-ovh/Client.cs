@@ -714,43 +714,43 @@ namespace Ovh.Api
                 case HttpStatusCode.Forbidden:
                     if (errorCode == "NOT_GRANTED_CALL")
                     {
-                        return new NotGrantedCallException(message);
+                        return new NotGrantedCallException(message, ex);
                     }
                     else if (errorCode == "NOT_CREDENTIAL")
                     {
-                       return new NotCredentialException(message);
+                       return new NotCredentialException(message, ex);
                     }
                     else if (errorCode == "INVALID_KEY")
                     {
-                       return new InvalidKeyException(message);
+                       return new InvalidKeyException(message, ex);
                     }
                     else if (errorCode == "INVALID_CREDENTIAL")
                     {
-                       return new InvalidCredentialException(message);
+                       return new InvalidCredentialException(message, ex);
                     }
                     else if (errorCode == "FORBIDDEN")
                     {
-                       return new ForbiddenException(message);
+                       return new ForbiddenException(message, ex);
                     }
                     else
                     {
-                       return new ApiException(message);
+                       return new ApiException(message, ex);
                     }
                 case HttpStatusCode.NotFound:
-                    throw new ResourceNotFoundException(message);
+                    throw new ResourceNotFoundException(message, ex);
                 case HttpStatusCode.BadRequest:
                     if (errorCode == "QUERY_TIME_OUT")
                     {
-                       return new StaleRequestException(message);
+                       return new StaleRequestException(message, ex);
                     }
                     else
                     {
-                       return new BadParametersException(message);
+                       return new BadParametersException(message, ex);
                     }
                 case HttpStatusCode.Conflict:
-                   return new ResourceConflictException(message);
+                   return new ResourceConflictException(message, ex);
                 default:
-                    return new ApiException(message);
+                    return new ApiException(message, ex);
             }
         }
 
