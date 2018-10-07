@@ -168,14 +168,9 @@ namespace Ovh.Api
         {
             ConfigurationManager = new ConfigurationManager();
 
-            //Endpoint
-            if (string.IsNullOrWhiteSpace(endpoint))
-            {
-                endpoint = ConfigurationManager.Get("default", "endpoint");
-            }
-
             try
             {
+                endpoint = endpoint ?? ConfigurationManager.Get("default", "endpoint");
                 Endpoint = _endpoints[endpoint];
                 _webClient.BaseAddress = Endpoint;
             }
