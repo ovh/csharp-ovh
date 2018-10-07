@@ -102,8 +102,15 @@ namespace Ovh.Api
         /// </summary>
         public int Timeout { get; set; }
 
+        /// <summary>
+        /// Character that will be considered as a value separator
+        /// in the query URL (i.e https://api/resource/1,2).
+        /// Default is the comma (',')
+        public char ParameterSeparator { get; set; } = ',';
+
         private bool _isTimeDeltaInitialized;
         private long _timeDelta;
+
         /// <summary>
         /// Request signatures are valid only for a short amount of time to mitigate
         /// risk of attack replay scenarii which requires to use a common time
@@ -157,7 +164,7 @@ namespace Ovh.Api
         /// <param name="timeout">Connection timeout for each request</param>
         public Client(string endpoint = null, string applicationKey = null,
             string applicationSecret = null, string consumerKey = null,
-            int timeout = _defaultTimeout) : this()
+            int timeout = _defaultTimeout, char parameterSeparator = ',') : this()
         {
             ConfigurationManager = new ConfigurationManager();
 
@@ -182,7 +189,7 @@ namespace Ovh.Api
             if (string.IsNullOrWhiteSpace(applicationKey))
             {
                 string tempApplicationKey;
-                if(ConfigurationManager.TryGet(
+                if (ConfigurationManager.TryGet(
                     endpoint, "application_key", out tempApplicationKey))
                 {
                     ApplicationKey = tempApplicationKey;
@@ -242,6 +249,34 @@ namespace Ovh.Api
         }
 
         /// <summary>
+        /// Issues a batch GET call
+        /// </summary>
+        /// <param name="target">API method to call</param>
+        /// <param name="kwargs">Arguments to append to URL</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>Raw API response</returns>
+        public string GetBatch(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        {
+            target += kwargs?.ToString();
+            return Call("GET", target, null, needAuth, isBatch: true);
+        }
+
+
+        /// <summary>
+        /// Issues a batch GET call with an expected return type
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="kwargs">Arguments to append to URL</param>
+        /// <param name="isBatch">If true, this will query multiple resources in one call</param>
+        /// <returns>API response deserialized to List<T> by JSON.Net</returns>
+        public List<T> GetBatch<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        {
+            target += kwargs?.ToString();
+            return Call<List<T>>("GET", target, null, needAuth, isBatch: true);
+        }
+
+        /// <summary>
         /// Issues a GET call with an expected return type
         /// </summary>
         /// <typeparam name="T">Expected return type</typeparam>
@@ -256,7 +291,7 @@ namespace Ovh.Api
         }
 
         /// <summary>
-        /// Issues an aync GET call
+        /// Issues an async GET call
         /// </summary>
         /// <param name="target">API method to call</param>
         /// <param name="kwargs">Arguments to append to URL</param>
@@ -266,6 +301,19 @@ namespace Ovh.Api
         {
             target += kwargs?.ToString();
             return CallAsync("GET", target, null, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an async batch GET call
+        /// </summary>
+        /// <param name="target">API method to call</param>
+        /// <param name="kwargs">Arguments to append to URL</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>Raw API response</returns>
+        public Task<string> GetBatchAsync(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        {
+            target += kwargs?.ToString();
+            return CallAsync("GET", target, null, needAuth, isBatch: true);
         }
 
         /// <summary>
@@ -280,6 +328,20 @@ namespace Ovh.Api
         {
             target += kwargs?.ToString();
             return CallAsync<T>("GET", target, null, needAuth);
+        }
+
+        /// <summary>
+        /// Issues an async batch GET call with an expected return type
+        /// </summary>
+        /// <typeparam name="T">Expected return type</typeparam>
+        /// <param name="target">API method to call</param>
+        /// <param name="kwargs">Arguments to append to URL</param>
+        /// <param name="needAuth">If true, send authentication headers</param>
+        /// <returns>API response deserialized to List<T> by JSON.Net</returns>
+        public Task<List<T>> GetBatchAsync<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        {
+            target += kwargs?.ToString();
+            return CallAsync<List<T>>("GET", target, null, needAuth, isBatch: true);
         }
 
         #endregion
@@ -509,7 +571,7 @@ namespace Ovh.Api
             return Post<CredentialRequestResult, CredentialRequest>("/auth/credential", credentialRequest, false);
         }
 
-        private WebHeaderCollection GetHeaders(string method, string data, bool needAuth, string target)
+        private WebHeaderCollection GetHeaders(string method, string data, bool needAuth, string target, bool isBatch = false)
         {
             WebHeaderCollection headers = new WebHeaderCollection();
             headers.Add("X-Ovh-Application", ApplicationKey);
@@ -545,6 +607,11 @@ namespace Ovh.Api
                 headers.Add("X-Ovh-Signature", "$1$" + signature);
             }
 
+            if(isBatch)
+            {
+                headers.Add("X-Ovh-Batch", ParameterSeparator.ToString());
+            }
+
             return headers;
         }
 
@@ -565,11 +632,12 @@ namespace Ovh.Api
         /// <param name="path">api entrypoint to call, relative to endpoint base path</param>
         /// <param name="data">any json serializable data to send as request's body</param>
         /// <param name="needAuth">if False, bypass signature</param>
+        /// <param name="isBatch">If true, this call will query multiple resources at the same time</param>
         /// <exception cref="HttpException">When underlying request failed for network reason</exception>
         /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
-        private string Call(string method, string path, string data = null, bool needAuth = true)
+        private string Call(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
         {
-            PrepareCall(ref method, ref path, data, needAuth);
+            PrepareCall(ref method, ref path, data, needAuth, isBatch);
 
             try
             {
@@ -582,7 +650,7 @@ namespace Ovh.Api
                     return _webClient.DownloadString(path);
                 }
             }
-            catch(WebException ex)
+            catch (WebException ex)
             {
                 throw HandleWebException(ex);
             }
@@ -603,11 +671,12 @@ namespace Ovh.Api
         /// <param name="path">api entrypoint to call, relative to endpoint base path</param>
         /// <param name="data">any json serializable data to send as request's body</param>
         /// <param name="needAuth">if False, bypass signature</param>
+        /// <param name="isBatch">If true, this will query multiple resources in one call</param>
         /// <exception cref="HttpException">When underlying request failed for network reason</exception>
         /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
-        private Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true)
+        private Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
         {
-            PrepareCall(ref method, ref path, data, needAuth);
+            PrepareCall(ref method, ref path, data, needAuth, isBatch);
 
             Task<string> responseTask = null;
 
@@ -649,7 +718,7 @@ namespace Ovh.Api
             }
         }
 
-        private void PrepareCall(ref string method, ref string path, string data, bool needAuth)
+        private void PrepareCall(ref string method, ref string path, string data, bool needAuth, bool isBatch = false)
         {
             method = method.ToUpper();
             if (path.StartsWith("/"))
@@ -658,17 +727,17 @@ namespace Ovh.Api
             }
             string target = Endpoint + path;
             //NOTE: would be better to reuse some headers
-            _webClient.Headers = GetHeaders(method, data, needAuth, target);
+            _webClient.Headers = GetHeaders(method, data, needAuth, target, isBatch);
         }
 
-        private T Call<T>(string method, string path, string data = null, bool needAuth = true)
+        private T Call<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
         {
-            return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth));
+            return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth, isBatch: isBatch));
         }
 
-        private Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true)
+        private Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
         {
-            return CallAsync(method, path, data, needAuth).ContinueWith((r) => JsonConvert.DeserializeObject<T>(r.Result));
+            return CallAsync(method, path, data, needAuth, isBatch).ContinueWith((r) => JsonConvert.DeserializeObject<T>(r.Result));
         }
 
         private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true)
@@ -676,7 +745,7 @@ namespace Ovh.Api
         {
             return Call<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
         }
-        
+
         private Task<T> CallAsync<T, Y>(string method, string path, Y data = null, bool needAuth = true)
             where Y : class
         {
