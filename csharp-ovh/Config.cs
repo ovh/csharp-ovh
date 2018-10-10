@@ -26,8 +26,9 @@
 //(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using IniParser.Model;
-using IniParser.Parser;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
 using Ovh.Api.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -67,30 +68,29 @@ namespace Ovh.Api
     public class ConfigurationManager
     {
         //Locations where to look for configuration file by *increasing* priority
-        private readonly string[] _configPaths = { "%USERPROFILE%/.ovh.conf", "" };
+        private readonly string[] _configPaths = { "%USERPROFILE%/", AppDomain.CurrentDomain.BaseDirectory };
+        private const string _confName = ".ovh.conf";
         /// <summary>
         /// INI data from the configuration file
         /// </summary>
-        public IniData Config { get; set; }
+        public IConfigurationRoot Config { get; set; }
 
         /// <summary>
         /// Create a config parser and load config from environment.
         /// </summary>
         public ConfigurationManager()
         {
-            string libraryPath = AppDomain.CurrentDomain.BaseDirectory;
-            string confPath = Path.Combine(libraryPath, ".ovh.conf");
-            _configPaths[1] = confPath;
-
-            IniDataParser parser = new IniDataParser();
-            string chosenPath = _configPaths.LastOrDefault(p => File.Exists(p));
+            string chosenPath = _configPaths.LastOrDefault(p => File.Exists(p + _confName));
             if (chosenPath == null)
             {
-                Config = new IniData();
+                Config = new ConfigurationBuilder().Build();
             }
             else
             {
-                Config = parser.Parse(File.ReadAllText(chosenPath));
+                var provider = new PhysicalFileProvider(chosenPath, ExclusionFilters.System);
+                Config = new ConfigurationBuilder()
+                    .AddIniFile(provider, _confName, false, false)
+                    .Build();
             }
         }
 
@@ -104,26 +104,25 @@ namespace Ovh.Api
         public ConfigurationManager(string endpoint, string applicationKey = null,
             string applicationSecret = null, string consumerKey = null)
         {
-            Config = new IniData();
+            var config = new Dictionary<string, string>();
+            config.Add("default:endpoint", endpoint);
 
-            Config.Sections.Add(new SectionData("default"));
-            Config.Sections["default"].AddKey("endpoint", endpoint);
-
-            Config.Sections.Add(new SectionData(endpoint));
             if (applicationKey != null)
             {
-                Config.Sections[endpoint].AddKey("application_key", applicationKey);
+                config.Add($"{endpoint}:application_key", applicationKey);
             }
 
             if (applicationSecret != null)
             {
-                Config.Sections[endpoint].AddKey("application_secret", applicationSecret);
+                config.Add($"{endpoint}:application_secret", applicationSecret);
             }
 
             if (consumerKey != null)
             {
-                Config.Sections[endpoint].AddKey("consumer_key", consumerKey);
+                config.Add($"{endpoint}:consumer_key", consumerKey);
             }
+
+            Config = new ConfigurationBuilder().AddInMemoryCollection(config).Build();
         }
 
         /// <summary>
@@ -139,26 +138,29 @@ namespace Ovh.Api
         /// <exception cref="KeyNotFoundException">Configuration key is missing</exception>
         public string Get(string section, string name)
         {
-            string value = Environment.GetEnvironmentVariable("OVH_" + name.ToUpper());
-            if(value != null)
+            string envValue = Environment.GetEnvironmentVariable("OVH_" + name.ToUpper());
+            if(envValue != null)
             {
-                return value;
+                return envValue;
             }
 
-            KeyDataCollection sectionData = Config[section];
+            IConfigurationSection sectionData = Config
+                .GetChildren()
+                .FirstOrDefault(s => s.Key == section);
+
             if (sectionData == null)
             {
                 throw new ConfigurationKeyMissingException(
                     string.Format($"Could not find configuration section {section}"));
             }
 
-            value = Config[section][name];
-            if (value == null)
+            IConfigurationSection value = sectionData.GetSection(name);
+            if (value.Value == null)
             {
                 throw new ConfigurationKeyMissingException(
                     string.Format($"Could not find configuration key {name} in section {section}"));
             }
-            return value;
+            return value.Value;
         }
 
         /// <summary>

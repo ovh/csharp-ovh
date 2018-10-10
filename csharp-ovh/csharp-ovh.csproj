@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ini-parser" Version="2.5.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="2.2.0-preview2-35157" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 

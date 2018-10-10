@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using IniParser.Exceptions;
 using NUnit.Framework;
 using Ovh.Api;
+using Ovh.Api.Exceptions;
 
 namespace Ovh.Test
 {
@@ -51,7 +51,7 @@ namespace Ovh.Test
         public void InvalidConfigFile()
         {
             CreateInvalidConfigFile();
-            Assert.Throws<ParsingException>(() => new Client());
+            Assert.Throws(typeof(FormatException), () => new Client());
         }
 
         [Test]

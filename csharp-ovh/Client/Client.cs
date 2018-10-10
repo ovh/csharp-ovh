@@ -171,6 +171,10 @@ namespace Ovh.Api
             try
             {
                 endpoint = endpoint ?? ConfigurationManager.Get("default", "endpoint");
+                if(endpoint is null)
+                {
+                    throw new InvalidRegionException("Endpoint cannot be null.");
+                }
                 Endpoint = _endpoints[endpoint];
                 _webClient.BaseAddress = Endpoint;
             }
