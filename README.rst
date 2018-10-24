@@ -41,7 +41,7 @@ The easiest way to get the latest stable release is to grab it from `NuGet
 
 .. code:: bash
 
-    nuget install ovh
+    nuget install csharp-ovh
 
 Example Usage
 =============
@@ -130,13 +130,14 @@ customer's informations:
                 CredentialRequest requestPayload = new CredentialRequest(
                     new List<AccessRight>(){
                         new AccessRight("GET", "/me"),
+                        "https://redirect.url"
                     }
                 );
 
-                CredentialRequestResult credentialRequestResult = 
+                CredentialRequestResult credentialRequestResult =
                     client.RequestConsumerKey(requestPayload);
                 Console.Write(
-                    String.Format("Please visit {0} to authenticate ", 
+                    String.Format("Please visit {0} to authenticate ",
                         credentialRequestResult.ValidationUrl));
                 Console.WriteLine("and press enter to continue");
                 Console.ReadLine();
@@ -208,7 +209,7 @@ OVH to an arbitrary destination e-mail using API call
                 client.Post(String.Format("/email/domain/{0}/redirection", domain), payload);
 
                 Console.WriteLine(
-                    String.Format("Installed new mail redirection from {0} to {1}", 
+                    String.Format("Installed new mail redirection from {0} to {1}",
                         source, destination));
                 Console.ReadLine();
             }
