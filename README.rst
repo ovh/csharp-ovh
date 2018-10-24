@@ -129,9 +129,9 @@ customer's informations:
                 Client client = new Client();
                 CredentialRequest requestPayload = new CredentialRequest(
                     new List<AccessRight>(){
-                        new AccessRight("GET", "/me"),
-                        "https://redirect.url"
-                    }
+                        new AccessRight("GET", "/me")
+                    },
+                    "https://redirect.url"
                 );
 
                 CredentialRequestResult credentialRequestResult =
