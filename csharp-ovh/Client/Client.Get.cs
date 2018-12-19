@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using Ovh.Api;
 
 namespace Ovh.Api
 {
@@ -13,9 +14,9 @@ namespace Ovh.Api
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>Raw API response</returns>
-        public string Get(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        public string Get(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToString();
+            target += kwargs?.ToQueryString();
             return Call("GET", target, null, needAuth);
         }
 
@@ -26,9 +27,9 @@ namespace Ovh.Api
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>Raw API response</returns>
-        public string GetBatch(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        public string GetBatch(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToString();
+            target += kwargs?.ToQueryString();
             return Call("GET", target, null, needAuth, isBatch: true);
         }
 
@@ -41,9 +42,9 @@ namespace Ovh.Api
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="isBatch">If true, this will query multiple resources in one call</param>
         /// <returns>API response deserialized to List<T> by JSON.Net</returns>
-        public List<T> GetBatch<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        public List<T> GetBatch<T>(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToString();
+            target += kwargs?.ToQueryString();
             return Call<List<T>>("GET", target, null, needAuth, isBatch: true);
         }
 
@@ -55,9 +56,9 @@ namespace Ovh.Api
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>API response deserialized to T by JSON.Net</returns>
-        public T Get<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        public T Get<T>(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToString();
+            target += kwargs?.ToQueryString();
             return Call<T>("GET", target, null, needAuth);
         }
 
@@ -68,9 +69,9 @@ namespace Ovh.Api
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>Raw API response</returns>
-        public Task<string> GetAsync(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        public Task<string> GetAsync(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToString();
+            target += kwargs?.ToQueryString();
             return CallAsync("GET", target, null, needAuth);
         }
 
@@ -81,9 +82,9 @@ namespace Ovh.Api
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>Raw API response</returns>
-        public Task<string> GetBatchAsync(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        public Task<string> GetBatchAsync(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToString();
+            target += kwargs?.ToQueryString();
             return CallAsync("GET", target, null, needAuth, isBatch: true);
         }
 
@@ -95,9 +96,9 @@ namespace Ovh.Api
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>API response deserialized to T by JSON.Net</returns>
-        public Task<T> GetAsync<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        public Task<T> GetAsync<T>(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToString();
+            target += kwargs?.ToQueryString();
             return CallAsync<T>("GET", target, null, needAuth);
         }
 
@@ -109,9 +110,9 @@ namespace Ovh.Api
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>API response deserialized to List<T> by JSON.Net</returns>
-        public Task<List<T>> GetBatchAsync<T>(string target, NameValueCollection kwargs = null, bool needAuth = true)
+        public Task<List<T>> GetBatchAsync<T>(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToString();
+            target += kwargs?.ToQueryString();
             return CallAsync<List<T>>("GET", target, null, needAuth, isBatch: true);
         }
     }

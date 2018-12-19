@@ -343,10 +343,10 @@ This example assumes an existing Configuration_ with valid ``application_key``,
             {
                 Client client = new Client();
 
-                NameValueCollection nvc = new NameValueCollection();
-                nvc.Add("status", "validated");
+                QueryStringParams qsp = new QueryStringParams();
+                qsp.Add("status", "validated");
 
-                var credentialIds = client.Get<List<string>>("/me/api/credential", nvc);
+                var credentialIds = client.Get<List<string>>("/me/api/credential", qsp);
                 foreach (var credentialId in credentialIds)
                 {
                     string credentialUrl = "/me/api/credential/" + credentialId;

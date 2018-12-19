@@ -19,8 +19,8 @@ namespace Ovh.Api
         /// <param name="childUrlFormat">Format of the url for subsequent calls. Use * as the placeholder. Defaults to "&lt;target&gt;/*</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>An enumerator over children API Calls</returns>
-        public IEnumerable<string> Enumerate(string target, NameValueCollection rootCallKwargs = null,
-                                                 NameValueCollection childrenCallsKwargs = null,
+        public IEnumerable<string> Enumerate(string target, QueryStringParams rootCallKwargs = null,
+                                                 QueryStringParams childrenCallsKwargs = null,
                                                  string childUrlFormat = null, bool needAuth = true)
         {
             if(childUrlFormat == null)
@@ -38,8 +38,8 @@ namespace Ovh.Api
                 throw new ArgumentException("Too many placeholders for childUrlFormat, only one is allowed", "childUrlFormat");
             }
 
-            target += rootCallKwargs?.ToString();
-            string childKwargs = childrenCallsKwargs?.ToString();
+            target += rootCallKwargs?.ToQueryString();
+            string childKwargs = childrenCallsKwargs?.ToQueryString();
 
             foreach (string item in Call<IEnumerable<string>>("GET", target, null, needAuth))
             {
@@ -59,8 +59,8 @@ namespace Ovh.Api
         /// <param name="childUrlFormat">Format of the url for subsequent calls. Use * as the placeholder. Defaults to "&lt;target&gt;/*</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>An enumerator over children API Calls, deserialized to T by JSON.Net</returns>
-        public IEnumerable<T> Enumerate<T>(string target, NameValueCollection rootCallKwargs = null,
-                                                 NameValueCollection childrenCallsKwargs = null,
+        public IEnumerable<T> Enumerate<T>(string target, QueryStringParams rootCallKwargs = null,
+                                                 QueryStringParams childrenCallsKwargs = null,
                                                  string childUrlFormat = null, bool needAuth = true)
         {
             foreach (string item in Enumerate(target, rootCallKwargs, childrenCallsKwargs, childUrlFormat, needAuth))
