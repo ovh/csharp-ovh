@@ -68,7 +68,11 @@ namespace Ovh.Api
     public class ConfigurationManager
     {
         //Locations where to look for configuration file by *increasing* priority
-        private readonly string[] _configPaths = { "%USERPROFILE%/", AppDomain.CurrentDomain.BaseDirectory };
+        private readonly string[] _configPaths = {
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            AppDomain.CurrentDomain.BaseDirectory
+        };
+
         private const string _confName = ".ovh.conf";
         /// <summary>
         /// INI data from the configuration file
@@ -80,7 +84,7 @@ namespace Ovh.Api
         /// </summary>
         public ConfigurationManager()
         {
-            string chosenPath = _configPaths.LastOrDefault(p => File.Exists(p + _confName));
+            string chosenPath = _configPaths.LastOrDefault(p => File.Exists(Path.Combine(p, _confName)));
             if (chosenPath == null)
             {
                 Config = new ConfigurationBuilder().Build();
