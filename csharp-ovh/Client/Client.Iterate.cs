@@ -23,23 +23,23 @@ namespace Ovh.Api
                                                  QueryStringParams childrenCallsKwargs = null,
                                                  string childUrlFormat = null, bool needAuth = true)
         {
-            if(childUrlFormat == null)
+            if (childUrlFormat == null)
             {
                 childUrlFormat = target + "/*";
             }
 
             int placeholderCount = childUrlFormat.Count(c => c == '*');
-            if(placeholderCount == 0)
+            if (placeholderCount == 0)
             {
                 throw new ArgumentException("Missing placeholder for childUrlFormat", "childUrlFormat");
             }
-            else if(placeholderCount > 1)
+            else if (placeholderCount > 1)
             {
                 throw new ArgumentException("Too many placeholders for childUrlFormat, only one is allowed", "childUrlFormat");
             }
 
-            target += rootCallKwargs?.ToQueryString();
-            string childKwargs = childrenCallsKwargs?.ToQueryString();
+            target += rootCallKwargs?.ToString();
+            string childKwargs = childrenCallsKwargs?.ToString();
 
             foreach (string item in Call<IEnumerable<string>>("GET", target, null, needAuth))
             {

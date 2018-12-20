@@ -16,7 +16,7 @@ namespace Ovh.Api
         /// <returns>Raw API response</returns>
         public string Get(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToQueryString();
+            target += kwargs?.ToString();
             return Call("GET", target, null, needAuth);
         }
 
@@ -29,7 +29,7 @@ namespace Ovh.Api
         /// <returns>Raw API response</returns>
         public string GetBatch(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToQueryString();
+            target += kwargs?.ToString();
             return Call("GET", target, null, needAuth, isBatch: true);
         }
 
@@ -44,7 +44,7 @@ namespace Ovh.Api
         /// <returns>API response deserialized to List<T> by JSON.Net</returns>
         public List<T> GetBatch<T>(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToQueryString();
+            target += kwargs?.ToString();
             return Call<List<T>>("GET", target, null, needAuth, isBatch: true);
         }
 
@@ -58,7 +58,7 @@ namespace Ovh.Api
         /// <returns>API response deserialized to T by JSON.Net</returns>
         public T Get<T>(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToQueryString();
+            target += kwargs?.ToString();
             return Call<T>("GET", target, null, needAuth);
         }
 
@@ -71,7 +71,7 @@ namespace Ovh.Api
         /// <returns>Raw API response</returns>
         public Task<string> GetAsync(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToQueryString();
+            target += kwargs?.ToString();
             return CallAsync("GET", target, null, needAuth);
         }
 
@@ -84,7 +84,7 @@ namespace Ovh.Api
         /// <returns>Raw API response</returns>
         public Task<string> GetBatchAsync(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToQueryString();
+            target += kwargs?.ToString();
             return CallAsync("GET", target, null, needAuth, isBatch: true);
         }
 
@@ -98,7 +98,7 @@ namespace Ovh.Api
         /// <returns>API response deserialized to T by JSON.Net</returns>
         public Task<T> GetAsync<T>(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToQueryString();
+            target += kwargs?.ToString();
             return CallAsync<T>("GET", target, null, needAuth);
         }
 
@@ -112,7 +112,7 @@ namespace Ovh.Api
         /// <returns>API response deserialized to List<T> by JSON.Net</returns>
         public Task<List<T>> GetBatchAsync<T>(string target, QueryStringParams kwargs = null, bool needAuth = true)
         {
-            target += kwargs?.ToQueryString();
+            target += kwargs?.ToString();
             return CallAsync<List<T>>("GET", target, null, needAuth, isBatch: true);
         }
     }

@@ -18,18 +18,16 @@ namespace Ovh.Api
             Add((key, value));
         }
 
-        public string ToQueryString(bool includeQuestionMark = true)
+        public override string ToString()
         {
             var sb = new StringBuilder();
-            if(includeQuestionMark)
-            {
-                sb.Append("?");
-            }
+            sb.Append("?");
 
             bool firstParam = true;
 
             foreach (var param in this)
-            { if(!firstParam)
+            {
+                if(!firstParam)
                 {
                     sb.Append("&");
                 }
@@ -37,6 +35,8 @@ namespace Ovh.Api
                 sb.Append(HttpUtility.UrlEncode(param.Item1));
                 sb.Append("=");
                 sb.Append(HttpUtility.UrlEncode(param.Item2));
+
+                firstParam = false;
             }
 
             return sb.ToString();
