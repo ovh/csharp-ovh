@@ -3,16 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>csharp-ovh</AssemblyName>
-    <Version>3.0.1</Version>
+    <Version>3.2</Version>
     <Authors>Luke Marlin</Authors>
     <Company>OVH</Company>
     <Description>Csharp-OVH Class Library</Description>
+    <PackageId>csharp-ovh</PackageId>
     <PackageLicenseUrl>https://raw.githubusercontent.com/ovh/csharp-ovh/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/ovh/csharp-ovh</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="2.2.0-preview2-35157" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
