@@ -117,6 +117,7 @@ customer's informations:
 .. code:: csharp
 
     using Ovh.Api;
+    using Ovh.Api.Models;
     using System;
     using System.Collections.Generic;
 
@@ -131,7 +132,7 @@ customer's informations:
                     new List<AccessRight>(){
                         new AccessRight("GET", "/me")
                     },
-                    "https://redirect.url"
+                    "https://redirect.url" // Change this URL if you don't want to see an unreachable webpage after you validated your consumer key. An unreachable webpage does not mean that the validation has failed.
                 );
 
                 CredentialRequestResult credentialRequestResult =
@@ -142,6 +143,7 @@ customer's informations:
                 Console.WriteLine("and press enter to continue");
                 Console.ReadLine();
 
+                client.ConsumerKey = credentialRequestResult.ConsumerKey;
                 PartialMe me = client.Get<PartialMe>("/me");
 
                 Console.WriteLine(
