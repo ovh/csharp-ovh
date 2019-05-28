@@ -190,6 +190,7 @@ OVH to an arbitrary destination e-mail using API call
     using Ovh.Api;
     using System;
     using System.Collections.Generic;
+    using Newtonsoft.Json;
 
     namespace api_tester
     {
@@ -208,7 +209,10 @@ OVH to an arbitrary destination e-mail using API call
                 payload.Add("to", destination);
                 payload.Add("localCopy", false);
 
-                client.Post(String.Format("/email/domain/{0}/redirection", domain), payload);
+                client.Post(
+                    String.Format("/email/domain/{0}/redirection", domain),
+                    JsonConvert.SerializeObject(payload)
+                );
 
                 Console.WriteLine(
                     String.Format("Installed new mail redirection from {0} to {1}",
