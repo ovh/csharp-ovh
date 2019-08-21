@@ -18,7 +18,7 @@ credential creation and requests signing.
                 // Instantiate. Visit https://api.ovh.com/createToken/index.cgi?GET=/me
                 // to get your credentials
                 Client client = new Client("ovh-eu", "<application_key>", "<application_secret>", "<consumer_key>");
-                PartialMe me = client.Get<PartialMe>("/me");
+                PartialMe me = client.GetAsync<PartialMe>("/me").Result;
 
                 // Print nice welcome message
                 Console.WriteLine(String.Format("Hello {0}!", me.firstname));
@@ -144,7 +144,7 @@ customer's informations:
                 Console.ReadLine();
 
                 client.ConsumerKey = credentialRequestResult.ConsumerKey;
-                PartialMe me = client.Get<PartialMe>("/me");
+                PartialMe me = client.GetAsync<PartialMe>("/me").Result;
 
                 Console.WriteLine(
                     String.Format("Welcome, {0}", me.firstname));
@@ -209,10 +209,10 @@ OVH to an arbitrary destination e-mail using API call
                 payload.Add("to", destination);
                 payload.Add("localCopy", false);
 
-                client.Post(
+                client.PostAsync(
                     String.Format("/email/domain/{0}/redirection", domain),
                     JsonConvert.SerializeObject(payload)
-                );
+                ).Wait();
 
                 Console.WriteLine(
                     String.Format("Installed new mail redirection from {0} to {1}",
@@ -247,10 +247,10 @@ This example assumes an existing Configuration_ with valid ``application_key``,
             static void Main(string[] args)
             {
                 Client client = new Client();
-                var billIds = client.Get<List<string>>("/me/bill");
+                var billIds = client.GetAsync<List<string>>("/me/bill").Result;
                 foreach (var billId in billIds)
                 {
-                    PartialOvhBill details = client.Get<PartialOvhBill>("/me/bill/" + billId);
+                    PartialOvhBill details = client.GetAsync<PartialOvhBill>("/me/bill/" + billId).Result;
                     Console.WriteLine(
                         String.Format("{0} ({1}): {2} --> {3}",
                             billId, details.date, details.priceWithTax.text, details.pdfUrl));
@@ -300,14 +300,14 @@ This example assumes an existing Configuration_ with valid ``application_key``,
             {
                 Client client = new Client();
 
-                var serverIds = client.Get<List<string>>("/dedicated/server/");
+                var serverIds = client.GetAsync<List<string>>("/dedicated/server/").Result;
                 foreach (var serverId in serverIds)
                 {
                     string serverUrl = "/dedicated/server/" + serverId;
-                    var details = client.Get<PartialDedicatedServer>(serverUrl);
+                    var details = client.GetAsync<PartialDedicatedServer>(serverUrl).Result;
                     if (details.datacenter == "sbg1")
                     {
-                        client.Put(serverUrl + "/burst", "{\"status\":\"active\"}");
+                        client.PutAsync(serverUrl + "/burst", "{\"status\":\"active\"}").Result;
                         Console.WriteLine("Burst enabled on server " + serverId);
                     }
                 }
@@ -352,12 +352,12 @@ This example assumes an existing Configuration_ with valid ``application_key``,
                 QueryStringParams qsp = new QueryStringParams();
                 qsp.Add("status", "validated");
 
-                var credentialIds = client.Get<List<string>>("/me/api/credential", qsp);
+                var credentialIds = client.GetAsync<List<string>>("/me/api/credential", qsp).Result;
                 foreach (var credentialId in credentialIds)
                 {
                     string credentialUrl = "/me/api/credential/" + credentialId;
-                    var credential = client.Get<PartialCredential>(credentialUrl);
-                    var application = client.Get<PartialApplication>(credentialUrl + "/application");
+                    var credential = client.GetAsync<PartialCredential>(credentialUrl).Result;
+                    var application = client.GetAsync<PartialApplication>(credentialUrl + "/application").Result;
 
                     StringBuilder sb = new StringBuilder();
                     sb.Append(credentialId).Append(" ").Append(application.status)

@@ -60,7 +60,6 @@ namespace Ovh.Test
             CreateConfigFileWithEndpointOnly();
             Client client = new Client();
             Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
-            long a = client.TimeDelta;
         }
 
         [Test]
@@ -72,7 +71,6 @@ namespace Ovh.Test
             Assert.AreEqual(client.ApplicationKey, "my_app_key");
             Assert.AreEqual(client.ApplicationSecret, "my_application_secret");
             Assert.AreEqual(client.ConsumerKey, "my_consumer_key");
-            long a = client.TimeDelta;
         }
     }
 }
