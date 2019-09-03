@@ -53,12 +53,19 @@ namespace Ovh.Api
     /// </summary>
     public partial class Client
     {
+
+        public const string OVH_APP_HEADER = "X-Ovh-Application";
+        public const string OVH_CONSUMER_HEADER = "X-Ovh-Consumer";
+        public const string OVH_TIME_HEADER = "X-Ovh-Timestamp";
+        public const string OVH_SIGNATURE_HEADER = "X-Ovh-Signature";
+        public const string OVH_BATCH_HEADER = "X-Ovh-Batch";
+
         private readonly Dictionary<string, string> _endpoints =
             new Dictionary<string, string>();
 
         private const int _defaultTimeout = 180;
 
-        private readonly HttpClient _httpClient;
+        private static HttpClient _httpClient;
 
         /// <summary>
         /// Configuration manager used by this <c>Client</c>
@@ -109,7 +116,7 @@ namespace Ovh.Api
             {
                 if (!_isTimeDeltaInitialized)
                 {
-                    _timeDelta = ComputeTimeDelta().Result;
+                    _timeDelta = ComputeTimeDelta().GetAwaiter().GetResult();
                     _isTimeDeltaInitialized = true;
                 }
                 return _timeDelta;
@@ -138,7 +145,7 @@ namespace Ovh.Api
             try
             {
                 endpoint = endpoint ?? ConfigurationManager.Get("default", "endpoint");
-                if(endpoint is null)
+                if (endpoint is null)
                 {
                     throw new InvalidRegionException("Endpoint cannot be null.");
                 }
@@ -208,30 +215,52 @@ namespace Ovh.Api
         /// or "consumerKey" is not provided, this client will attempt to locate
         /// them from environment, %USERPROFILE%/.ovh.cfg and finally current_dir/.ovh.cfg.
         /// </summary>
-        /// <remarks><c>timeout</c> will be ignored if you provide your own <c>HttpClient</c></remarks>
+        /// <remarks><c>timeout</c> will be taken into account only at the first
+        /// instantiation of an <see cref=Ovh.Api.Client/> because the <c>HttpClient</c> used
+        /// by it is static</remarks>
         /// <param name="endpoint">API endpoint to use. Valid values in "Endpoints"</param>
         /// <param name="applicationKey">Application key as provided by OVH</param>
         /// <param name="applicationSecret">Application secret key as provided by OVH</param>
         /// <param name="consumerKey">User token as provided by OVH</param>
         /// <param name="timeout">Connection timeout for each request</param>
         /// <param name="parameterSeparator">Separator that should be used when sending Batch Requests</param>
-        /// <param name="client">An HttpClient that should be used to make requests.</param>
         public Client(string endpoint = null, string applicationKey = null,
             string applicationSecret = null, string consumerKey = null,
-            int timeout = _defaultTimeout, char parameterSeparator = ',',
-            HttpClient httpClient = null) : this()
+            int timeout = _defaultTimeout, char parameterSeparator = ',') : this()
         {
             LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator);
             Timeout = timeout;
-            if(httpClient == null)
+            if (_httpClient == null)
             {
                 _httpClient = new HttpClient();
                 _httpClient.Timeout = new TimeSpan(0, 0, timeout);
             }
-            else
-            {
-                _httpClient = httpClient;
-            }
+        }
+
+        /// <summary>
+        /// Creates a new Client. No credential check is done at this point.
+        /// The "applicationKey" identifies your application while
+        /// "applicationSecret" authenticates it. On the other hand, the
+        /// "consumerKey" uniquely identifies your application's end user without
+        /// requiring his personal password.
+        /// If any of "endpoint", "applicationKey", "applicationSecret"
+        /// or "consumerKey" is not provided, this client will attempt to locate
+        /// them from environment, %USERPROFILE%/.ovh.cfg and finally current_dir/.ovh.cfg.
+        /// </summary>
+        /// <remarks><c>httpClient</c> will be affect all existings <see cref=Ovh.Api.Client/>
+        /// because the <c>HttpClient</c> used by it is static</remarks>
+        /// <param name="client">An HttpClient that should be used to make requests.</param>
+        /// <param name="endpoint">API endpoint to use. Valid values in "Endpoints"</param>
+        /// <param name="applicationKey">Application key as provided by OVH</param>
+        /// <param name="applicationSecret">Application secret key as provided by OVH</param>
+        /// <param name="consumerKey">User token as provided by OVH</param>
+        /// <param name="parameterSeparator">Separator that should be used when sending Batch Requests</param>
+        public Client(HttpClient httpClient, string endpoint = null, string applicationKey = null,
+            string applicationSecret = null, string consumerKey = null,
+            char parameterSeparator = ',') : this()
+        {
+            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator);
+            _httpClient = httpClient;
         }
 
 
@@ -242,8 +271,8 @@ namespace Ovh.Api
         /// As such, changes to this method will happen without any notice.
         /// </summary>
         /// <param name="customTimeProvider"></param>
-        /// <returns></returns>
-        public Client AsTestable(ITimeProvider customTimeProvider)
+        /// <returns>A client with a custom <see cref=ITimeProvider/></returns>
+        internal Client AsTestable(ITimeProvider customTimeProvider)
         {
             _timeProvider = customTimeProvider;
             return this;
@@ -301,37 +330,39 @@ namespace Ovh.Api
         private void SetHeaders(HttpRequestMessage msg, string method, string target, string data, bool needAuth, bool isBatch = false)
         {
             var headers = msg.Headers;
-            headers.Add("X-Ovh-Application", ApplicationKey);
+            headers.Add(OVH_APP_HEADER, ApplicationKey);
 
-            if (needAuth)
+            if (isBatch)
             {
-                if (ApplicationSecret == null)
-                {
-                    throw new InvalidKeyException("Application secret is missing.");
-                }
-                if (ConsumerKey == null)
-                {
-                    throw new InvalidKeyException("ConsumerKey is missing.");
-                }
-
-                long currentTimestamp = _timeProvider.UtcNow.ToUnixTimeSeconds() + TimeDelta;
-                string signature = GenerateSignature(
-                    applicationSecret: ApplicationSecret,
-                    consumerKey: ConsumerKey,
-                    currentTimestamp: currentTimestamp,
-                    method: method,
-                    target: target,
-                    data: data);
-
-                headers.Add("X-Ovh-Consumer", ConsumerKey);
-                headers.Add("X-Ovh-Timestamp", currentTimestamp.ToString());
-                headers.Add("X-Ovh-Signature", signature);
+                headers.Add(OVH_BATCH_HEADER, ParameterSeparator.ToString());
             }
 
-            if(isBatch)
+            if (!needAuth)
             {
-                headers.Add("X-Ovh-Batch", ParameterSeparator.ToString());
+                return;
             }
+
+            if (ApplicationSecret == null)
+            {
+                throw new InvalidKeyException("Application secret is missing.");
+            }
+            if (ConsumerKey == null)
+            {
+                throw new InvalidKeyException("ConsumerKey is missing.");
+            }
+
+            long currentTimestamp = _timeProvider.UtcNow.ToUnixTimeSeconds() + TimeDelta;
+            string signature = GenerateSignature(
+                applicationSecret: ApplicationSecret,
+                consumerKey: ConsumerKey,
+                currentTimestamp: currentTimestamp,
+                method: method,
+                target: target,
+                data: data);
+
+            headers.Add(OVH_CONSUMER_HEADER, ConsumerKey);
+            headers.Add(OVH_TIME_HEADER, currentTimestamp.ToString());
+            headers.Add(OVH_SIGNATURE_HEADER, signature);
         }
 
         #region Call
@@ -356,7 +387,7 @@ namespace Ovh.Api
         /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
         private string Call(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
         {
-            return CallAsync(method, path, data, needAuth, isBatch).Result;
+            return CallAsync(method, path, data, needAuth, isBatch).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -389,10 +420,10 @@ namespace Ovh.Api
             try
             {
                 var httpMethod = new HttpMethod(method);
-                HttpRequestMessage msg = new HttpRequestMessage (httpMethod, new Uri(Endpoint + path));
-                if(httpMethod != HttpMethod.Get)
+                HttpRequestMessage msg = new HttpRequestMessage(httpMethod, new Uri(Endpoint + path));
+                if (httpMethod != HttpMethod.Get)
                 {
-                    if(data != null)
+                    if (data != null)
                     {
                         msg.Content = new StringContent(data ?? "", Encoding.UTF8, "application/json");
                     }
@@ -400,12 +431,12 @@ namespace Ovh.Api
                 SetHeaders(msg, method, Endpoint + path, data, needAuth, isBatch);
                 response = await _httpClient.SendAsync(msg).ConfigureAwait(false);
             }
-            catch(HttpRequestException e)
+            catch (HttpRequestException e)
             {
                 throw new HttpException("An exception occured while trying to issue the HTTP call", e);
             }
 
-            if(response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsStringAsync();
             }
@@ -418,9 +449,10 @@ namespace Ovh.Api
             return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth, isBatch: isBatch));
         }
 
-        private Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
+        private async Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
         {
-            return CallAsync(method, path, data, needAuth, isBatch).ContinueWith((r) => JsonConvert.DeserializeObject<T>(r.Result));
+            var response = await CallAsync(method, path, data, needAuth, isBatch);
+            return JsonConvert.DeserializeObject<T>(response);
         }
 
         private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true)
@@ -470,37 +502,37 @@ namespace Ovh.Api
                     }
                     else if (errorCode == "NOT_CREDENTIAL")
                     {
-                       return new NotCredentialException(message);
+                        return new NotCredentialException(message);
                     }
                     else if (errorCode == "INVALID_KEY")
                     {
-                       return new InvalidKeyException(message);
+                        return new InvalidKeyException(message);
                     }
                     else if (errorCode == "INVALID_CREDENTIAL")
                     {
-                       return new InvalidCredentialException(message);
+                        return new InvalidCredentialException(message);
                     }
                     else if (errorCode == "FORBIDDEN")
                     {
-                       return new ForbiddenException(message);
+                        return new ForbiddenException(message);
                     }
                     else
                     {
-                       return new ApiException(message);
+                        return new ApiException(message);
                     }
                 case HttpStatusCode.NotFound:
                     throw new ResourceNotFoundException(message);
                 case HttpStatusCode.BadRequest:
                     if (errorCode == "QUERY_TIME_OUT")
                     {
-                       return new StaleRequestException(message);
+                        return new StaleRequestException(message);
                     }
                     else
                     {
-                       return new BadParametersException(message);
+                        return new BadParametersException(message);
                     }
                 case HttpStatusCode.Conflict:
-                   return new ResourceConflictException(message);
+                    return new ResourceConflictException(message);
                 default:
                     return new ApiException(message);
             }

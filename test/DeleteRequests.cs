@@ -5,6 +5,7 @@ using Ovh.Api.Testing;
 using System;
 using FakeItEasy;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Ovh.Test
 {
@@ -30,7 +31,7 @@ namespace Ovh.Test
         }
 
         [Test]
-        public void DELETE_as_string()
+        public async Task DELETE_as_string()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
@@ -41,7 +42,7 @@ namespace Ovh.Test
                 .Returns(Responses.Delete.nullAsHttpResponseMessage);
 
             var c = ClientFactory.GetClient(fake);
-            var result = c.DeleteAsync("/ip/127.0.0.1").Result;
+            var result = await c.DeleteAsync("/ip/127.0.0.1");
             Assert.AreEqual(Responses.Delete.nullAsJsonString, result);
 
             var meCall = Fake.GetCalls(fake).Where(call =>
@@ -51,15 +52,15 @@ namespace Ovh.Test
             var requestMessage = meCall.GetArgument<HttpRequestMessage>("request");
             var headers = requestMessage.Headers;
             Assert.Multiple(() => {
-                Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Constants.OVH_APP_HEADER).First());
-                Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Constants.OVH_CONSUMER_HEADER).First());
-                Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Constants.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$610ebc657a19d6b444264f998291a4f24bc3227d", headers.GetValues(Constants.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
+                Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
+                Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
+                Assert.AreEqual("$1$610ebc657a19d6b444264f998291a4f24bc3227d", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 
         [Test]
-        public void DELETE_as_T()
+        public async Task DELETE_as_T()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
@@ -74,7 +75,7 @@ namespace Ovh.Test
             var queryParams = new QueryStringParams();
             queryParams.Add("filter", "value:&é'-");
             queryParams.Add("anotherfilter", "=test");
-            var result = c.DeleteAsync<object>("/ip/127.0.0.1").Result;
+            var result = await c.DeleteAsync<object>("/ip/127.0.0.1");
             Assert.IsNull(result);
         }
     }

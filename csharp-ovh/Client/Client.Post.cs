@@ -12,7 +12,7 @@ namespace Ovh.Api
         /// <param name="data">Json data to send as body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>Raw API response</returns>
-        [Obsolete("This method just calls the async version and applies '.Result' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
+        [Obsolete("This method just calls the async version and applies 'GetAwaiter().GetResult()' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
         public string Post(string target, string data, bool needAuth = true)
         {
             return Call("POST", target, data, needAuth);
@@ -26,7 +26,7 @@ namespace Ovh.Api
         /// <param name="data">Json data to send as body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>API response deserialized to T by JSON.Net</returns>
-        [Obsolete("This method just calls the async version and applies '.Result' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
+        [Obsolete("This method just calls the async version and applies 'GetAwaiter().GetResult()' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
         public T Post<T>(string target, string data, bool needAuth = true)
         {
             return Call<T>("POST", target, data, needAuth);
@@ -41,7 +41,7 @@ namespace Ovh.Api
         /// <param name="data">Json data to send as body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
-        [Obsolete("This method just calls the async version and applies '.Result' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
+        [Obsolete("This method just calls the async version and applies 'GetAwaiter().GetResult()' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
         public T Post<T, Y>(string target, Y data, bool needAuth = true)
             where Y : class
         {

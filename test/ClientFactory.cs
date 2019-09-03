@@ -11,9 +11,9 @@ namespace Ovh.Test
         {
             if(withConsumerKey)
             {
-                return new Client(Constants.ENDPOINT, Constants.APPLICATION_KEY, Constants.APPLICATION_SECRET, Constants.CONSUMER_KEY, httpClient: new HttpClient(handler));
+                return new Client(new HttpClient(handler), Constants.ENDPOINT, Constants.APPLICATION_KEY, Constants.APPLICATION_SECRET, Constants.CONSUMER_KEY);
             }
-            return new Client(Constants.ENDPOINT, Constants.APPLICATION_KEY, Constants.APPLICATION_SECRET, httpClient: new HttpClient(handler));
+            return new Client(new HttpClient(handler), Constants.ENDPOINT, Constants.APPLICATION_KEY, Constants.APPLICATION_SECRET);
         }
 
     }

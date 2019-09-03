@@ -6,6 +6,7 @@ using System;
 using FakeItEasy;
 using System.Linq;
 using Ovh.Test.Models;
+using System.Threading.Tasks;
 
 namespace Ovh.Test
 {
@@ -37,13 +38,13 @@ namespace Ovh.Test
             MockAuthTimeCallWithFakeItEasy(testHandler);
 
             var httpClient = new HttpClient(testHandler);
-            var c = new Client("ovh-eu", httpClient: httpClient).AsTestable(timeProvider);
+            var c = new Client(httpClient, "ovh-eu").AsTestable(timeProvider);
 
             Assert.AreEqual(2, c.TimeDelta);
         }
 
         [Test]
-        public void GET_me_as_string()
+        public async Task GET_me_as_string()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
@@ -55,7 +56,7 @@ namespace Ovh.Test
 
 
             var c = ClientFactory.GetClient(fake);
-            var result = c.GetAsync("/me").Result;
+            var result = await c.GetAsync("/me");
             Assert.AreEqual(Responses.Get.me_content, result);
 
             var meCall = Fake.GetCalls(fake).Where(call =>
@@ -65,15 +66,15 @@ namespace Ovh.Test
             var requestMessage = meCall.GetArgument<HttpRequestMessage>("request");
             var headers = requestMessage.Headers;
             Assert.Multiple(() => {
-                Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Constants.OVH_APP_HEADER).First());
-                Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Constants.OVH_CONSUMER_HEADER).First());
-                Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Constants.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$dfe0b86bf2ab0d9eb3f785dc1ab00de58984d80c", headers.GetValues(Constants.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
+                Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
+                Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
+                Assert.AreEqual("$1$dfe0b86bf2ab0d9eb3f785dc1ab00de58984d80c", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 
         [Test]
-        public void GET_me_as_T()
+        public async Task ET_me_as_T()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
@@ -85,7 +86,7 @@ namespace Ovh.Test
 
 
             var c = ClientFactory.GetClient(fake);
-            var result = c.GetAsync<Me>("/me").Result;
+            var result = await c.GetAsync<Me>("/me");
 
             Assert.AreEqual("Noname", result.name);
             Assert.AreEqual("none-ovh", result.nichandle);
@@ -94,7 +95,7 @@ namespace Ovh.Test
         }
 
         [Test]
-        public void GET_with_filter_generates_correct_signature()
+        public async Task ET_with_filter_generates_correct_signature()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
@@ -109,7 +110,7 @@ namespace Ovh.Test
             var queryParams = new QueryStringParams();
             queryParams.Add("filter", "value:&é'-");
             queryParams.Add("anotherfilter", "=test");
-            _ = c.GetAsync("/route", queryParams).Result;
+            _ = await c.GetAsync("/route", queryParams);
 
 
             var meCall = Fake.GetCalls(fake).Where(call =>
@@ -118,7 +119,7 @@ namespace Ovh.Test
 
             var requestMessage = meCall.GetArgument<HttpRequestMessage>("request");
             var headers = requestMessage.Headers;
-            Assert.AreEqual("$1$098b93d342b6db4848ec448063be2b6884e94723", headers.GetValues(Constants.OVH_SIGNATURE_HEADER).First());
+            Assert.AreEqual("$1$098b93d342b6db4848ec448063be2b6884e94723", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
         }
     }
 }
