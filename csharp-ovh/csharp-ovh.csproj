@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>csharp-ovh</AssemblyName>
-    <Version>3.2</Version>
+    <Version>3.3.0</Version>
     <Authors>Luke Marlin</Authors>
     <Company>OVH</Company>
     <Description>Csharp-OVH Class Library</Description>
@@ -16,5 +16,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
+
+  <ItemGroup>
+  <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+    <_Parameter1>test</_Parameter1>
+  </AssemblyAttribute>
+</ItemGroup>
 
 </Project>

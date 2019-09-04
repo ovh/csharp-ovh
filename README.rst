@@ -13,12 +13,12 @@ credential creation and requests signing.
     {
         class Program
         {
-            static void Main(string[] args)
+            static async Task Main(string[] args)
             {
                 // Instantiate. Visit https://api.ovh.com/createToken/index.cgi?GET=/me
                 // to get your credentials
                 Client client = new Client("ovh-eu", "<application_key>", "<application_secret>", "<consumer_key>");
-                PartialMe me = client.Get<PartialMe>("/me");
+                PartialMe me = await client.GetAsync<PartialMe>("/me");
 
                 // Print nice welcome message
                 Console.WriteLine(String.Format("Hello {0}!", me.firstname));
@@ -125,7 +125,7 @@ customer's informations:
     {
         class Program
         {
-            static void Main(string[] args)
+            static async Task Main(string[] args)
             {
                 Client client = new Client();
                 CredentialRequest requestPayload = new CredentialRequest(
@@ -144,7 +144,7 @@ customer's informations:
                 Console.ReadLine();
 
                 client.ConsumerKey = credentialRequestResult.ConsumerKey;
-                PartialMe me = client.Get<PartialMe>("/me");
+                PartialMe me = await client.GetAsync<PartialMe>("/me");
 
                 Console.WriteLine(
                     String.Format("Welcome, {0}", me.firstname));
@@ -209,10 +209,10 @@ OVH to an arbitrary destination e-mail using API call
                 payload.Add("to", destination);
                 payload.Add("localCopy", false);
 
-                client.Post(
+                client.PostAsync(
                     String.Format("/email/domain/{0}/redirection", domain),
                     JsonConvert.SerializeObject(payload)
-                );
+                ).Wait();
 
                 Console.WriteLine(
                     String.Format("Installed new mail redirection from {0} to {1}",
@@ -244,13 +244,13 @@ This example assumes an existing Configuration_ with valid ``application_key``,
     {
         class Program
         {
-            static void Main(string[] args)
+            static async Task Main(string[] args)
             {
                 Client client = new Client();
-                var billIds = client.Get<List<string>>("/me/bill");
+                var billIds = await client.GetAsync<List<string>>("/me/bill");
                 foreach (var billId in billIds)
                 {
-                    PartialOvhBill details = client.Get<PartialOvhBill>("/me/bill/" + billId);
+                    PartialOvhBill details = await client.GetAsync<PartialOvhBill>("/me/bill/" + billId);
                     Console.WriteLine(
                         String.Format("{0} ({1}): {2} --> {3}",
                             billId, details.date, details.priceWithTax.text, details.pdfUrl));
@@ -296,18 +296,18 @@ This example assumes an existing Configuration_ with valid ``application_key``,
     {
         class Program
         {
-            static void Main(string[] args)
+            static async Task Main(string[] args)
             {
                 Client client = new Client();
 
-                var serverIds = client.Get<List<string>>("/dedicated/server/");
+                var serverIds = await client.GetAsync<List<string>>("/dedicated/server/");
                 foreach (var serverId in serverIds)
                 {
                     string serverUrl = "/dedicated/server/" + serverId;
-                    var details = client.Get<PartialDedicatedServer>(serverUrl);
+                    var details = await client.GetAsync<PartialDedicatedServer>(serverUrl);
                     if (details.datacenter == "sbg1")
                     {
-                        client.Put(serverUrl + "/burst", "{\"status\":\"active\"}");
+                        await client.PutAsync(serverUrl + "/burst", "{\"status\":\"active\"}");
                         Console.WriteLine("Burst enabled on server " + serverId);
                     }
                 }
@@ -345,19 +345,19 @@ This example assumes an existing Configuration_ with valid ``application_key``,
     {
         class Program
         {
-            static void Main(string[] args)
+            static async Task Main(string[] args)
             {
                 Client client = new Client();
 
                 QueryStringParams qsp = new QueryStringParams();
                 qsp.Add("status", "validated");
 
-                var credentialIds = client.Get<List<string>>("/me/api/credential", qsp);
+                var credentialIds = await client.GetAsync<List<string>>("/me/api/credential", qsp);
                 foreach (var credentialId in credentialIds)
                 {
                     string credentialUrl = "/me/api/credential/" + credentialId;
-                    var credential = client.Get<PartialCredential>(credentialUrl);
-                    var application = client.Get<PartialApplication>(credentialUrl + "/application");
+                    var credential = await client.GetAsync<PartialCredential>(credentialUrl);
+                    var application = await client.GetAsync<PartialApplication>(credentialUrl + "/application");
 
                     StringBuilder sb = new StringBuilder();
                     sb.Append(credentialId).Append(" ").Append(application.status)
