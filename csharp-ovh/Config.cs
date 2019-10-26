@@ -73,7 +73,6 @@ namespace Ovh.Api
             AppDomain.CurrentDomain.BaseDirectory
         };
 
-        private const string _confName = ".ovh.conf";
         /// <summary>
         /// INI data from the configuration file
         /// </summary>
@@ -82,9 +81,9 @@ namespace Ovh.Api
         /// <summary>
         /// Create a config parser and load config from environment.
         /// </summary>
-        public ConfigurationManager()
+        public ConfigurationManager(string confName)
         {
-            string chosenPath = _configPaths.LastOrDefault(p => File.Exists(Path.Combine(p, _confName)));
+            string chosenPath = _configPaths.LastOrDefault(p => File.Exists(Path.Combine(p, confName)));
             if (chosenPath == null)
             {
                 Config = new ConfigurationBuilder().Build();
@@ -93,7 +92,7 @@ namespace Ovh.Api
             {
                 var provider = new PhysicalFileProvider(chosenPath, ExclusionFilters.System);
                 Config = new ConfigurationBuilder()
-                    .AddIniFile(provider, _confName, false, false)
+                    .AddIniFile(provider, confName, false, false)
                     .Build();
             }
         }

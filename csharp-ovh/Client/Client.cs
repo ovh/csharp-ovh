@@ -138,9 +138,10 @@ namespace Ovh.Api
         }
 
         private void LoadConfiguration(string endpoint, string applicationKey,
-            string applicationSecret, string consumerKey, char parameterSeparator)
+            string applicationSecret, string consumerKey, char parameterSeparator, 
+            string confName = ".ovh.conf")
         {
-            ConfigurationManager = new ConfigurationManager();
+            ConfigurationManager = new ConfigurationManager(confName);
 
             try
             {
@@ -225,10 +226,10 @@ namespace Ovh.Api
         /// <param name="timeout">Connection timeout for each request</param>
         /// <param name="parameterSeparator">Separator that should be used when sending Batch Requests</param>
         public Client(string endpoint = null, string applicationKey = null,
-            string applicationSecret = null, string consumerKey = null,
+            string applicationSecret = null, string consumerKey = null, string confName = ".ovh.conf",
             int timeout = _defaultTimeout, char parameterSeparator = ',') : this()
         {
-            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator);
+            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator, confName);
             Timeout = timeout;
             if (_httpClient == null)
             {
