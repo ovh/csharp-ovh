@@ -38,6 +38,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ovh.Api
@@ -63,7 +64,7 @@ namespace Ovh.Api
         private readonly Dictionary<string, string> _endpoints =
             new Dictionary<string, string>();
 
-        private const int _defaultTimeout = 180;
+        private TimeSpan _defaultTimeout = TimeSpan.FromSeconds(180);
 
         private static HttpClient _httpClient;
 
@@ -87,11 +88,6 @@ namespace Ovh.Api
         /// Consumer key that can be either <see cref="RequestConsumerKey">generated</see> or passed to the <see cref="ConfigurationManager">configuration manager</see>>
         /// </summary>
         public string ConsumerKey { get; set; }
-        /// <summary>
-        /// HTTP operations timeout
-        /// </summary>
-        [Obsolete("That property will be removed. If you want to give a specific timeout, pass it to the constructor, or give your own handler in the constructor")]
-        public int Timeout { get; set; }
 
         /// <summary>
         /// Character that will be considered as a value separator
@@ -222,47 +218,17 @@ namespace Ovh.Api
         /// <param name="applicationKey">Application key as provided by OVH</param>
         /// <param name="applicationSecret">Application secret key as provided by OVH</param>
         /// <param name="consumerKey">User token as provided by OVH</param>
-        /// <param name="timeout">Connection timeout for each request</param>
+        /// <param name="defaultTimeout">Connection timeout for each request</param>
         /// <param name="parameterSeparator">Separator that should be used when sending Batch Requests</param>
         public Client(string endpoint = null, string applicationKey = null,
             string applicationSecret = null, string consumerKey = null,
-            int timeout = _defaultTimeout, char parameterSeparator = ',') : this()
+            TimeSpan? defaultTimeout = null, char parameterSeparator = ',',
+            HttpClient httpClient = null) : this()
         {
             LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator);
-            Timeout = timeout;
-            if (_httpClient == null)
-            {
-                _httpClient = new HttpClient();
-                _httpClient.Timeout = new TimeSpan(0, 0, timeout);
-            }
+            _defaultTimeout = defaultTimeout ?? _defaultTimeout;
+            _httpClient = httpClient ?? _httpClient ?? new HttpClient();
         }
-
-        /// <summary>
-        /// Creates a new Client. No credential check is done at this point.
-        /// The "applicationKey" identifies your application while
-        /// "applicationSecret" authenticates it. On the other hand, the
-        /// "consumerKey" uniquely identifies your application's end user without
-        /// requiring his personal password.
-        /// If any of "endpoint", "applicationKey", "applicationSecret"
-        /// or "consumerKey" is not provided, this client will attempt to locate
-        /// them from environment, %USERPROFILE%/.ovh.cfg and finally current_dir/.ovh.cfg.
-        /// </summary>
-        /// <remarks><c>httpClient</c> will be affect all existings <see cref=Ovh.Api.Client/>
-        /// because the <c>HttpClient</c> used by it is static</remarks>
-        /// <param name="client">An HttpClient that should be used to make requests.</param>
-        /// <param name="endpoint">API endpoint to use. Valid values in "Endpoints"</param>
-        /// <param name="applicationKey">Application key as provided by OVH</param>
-        /// <param name="applicationSecret">Application secret key as provided by OVH</param>
-        /// <param name="consumerKey">User token as provided by OVH</param>
-        /// <param name="parameterSeparator">Separator that should be used when sending Batch Requests</param>
-        public Client(HttpClient httpClient, string endpoint = null, string applicationKey = null,
-            string applicationSecret = null, string consumerKey = null,
-            char parameterSeparator = ',') : this()
-        {
-            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator);
-            _httpClient = httpClient;
-        }
-
 
         /// <summary>
         /// Returns the same client with a modified TimeProvider to make it unit-testable
@@ -408,7 +374,7 @@ namespace Ovh.Api
         /// <param name="isBatch">If true, this will query multiple resources in one call</param>
         /// <exception cref="HttpException">When underlying request failed for network reason</exception>
         /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
-        private async Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
+        private async Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)
         {
             if (path.StartsWith("/"))
             {
@@ -421,22 +387,24 @@ namespace Ovh.Api
             {
                 var httpMethod = new HttpMethod(method);
                 HttpRequestMessage msg = new HttpRequestMessage(httpMethod, new Uri(Endpoint + path));
-                if (httpMethod != HttpMethod.Get)
+                if (httpMethod != HttpMethod.Get && data != null)
                 {
-                    if (data != null)
-                    {
-                        msg.Content = new StringContent(data ?? "", Encoding.UTF8, "application/json");
-                    }
+                    msg.Content = new StringContent(data ?? "", Encoding.UTF8, "application/json");
                 }
+
                 SetHeaders(msg, method, Endpoint + path, data, needAuth, isBatch);
-                response = await _httpClient.SendAsync(msg).ConfigureAwait(false);
+
+                using (var cts = new CancellationTokenSource(timeout ?? _defaultTimeout))
+                {
+                    response = await _httpClient.SendAsync(msg, cts.Token).ConfigureAwait(false);
+                }
             }
             catch (HttpRequestException e)
             {
                 throw new HttpException("An exception occured while trying to issue the HTTP call", e);
             }
 
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsStringAsync();
             }
@@ -449,9 +417,9 @@ namespace Ovh.Api
             return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth, isBatch: isBatch));
         }
 
-        private async Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
+        private async Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)
         {
-            var response = await CallAsync(method, path, data, needAuth, isBatch);
+            var response = await CallAsync(method, path, data, needAuth, isBatch, timeout);
             return JsonConvert.DeserializeObject<T>(response);
         }
 

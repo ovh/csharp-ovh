@@ -38,7 +38,7 @@ namespace Ovh.Test
             MockAuthTimeCallWithFakeItEasy(testHandler);
 
             var httpClient = new HttpClient(testHandler);
-            var c = new Client(httpClient, "ovh-eu").AsTestable(timeProvider);
+            var c = new Client("ovh-eu", httpClient: httpClient).AsTestable(timeProvider);
 
             Assert.AreEqual(2, c.TimeDelta);
         }
@@ -74,7 +74,7 @@ namespace Ovh.Test
         }
 
         [Test]
-        public async Task ET_me_as_T()
+        public async Task GET_me_as_T()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
@@ -95,7 +95,7 @@ namespace Ovh.Test
         }
 
         [Test]
-        public async Task ET_with_filter_generates_correct_signature()
+        public async Task GET_with_filter_generates_correct_signature()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
