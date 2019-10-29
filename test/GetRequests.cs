@@ -7,6 +7,7 @@ using FakeItEasy;
 using System.Linq;
 using Ovh.Test.Models;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Ovh.Test
 {
@@ -71,6 +72,22 @@ namespace Ovh.Test
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
                 Assert.AreEqual("$1$dfe0b86bf2ab0d9eb3f785dc1ab00de58984d80c", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
+        }
+
+        [Test]
+        public void GET_me_throws_when_timeout_expires()
+        {
+            var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
+            MockAuthTimeCallWithFakeItEasy(fake);
+
+            A.CallTo(() =>
+                fake.Send(A<HttpRequestMessage>.That.Matches(
+                    r => r.RequestUri.ToString().Contains("/me"))))
+                .Invokes(() => Thread.Sleep(1000))
+                .Returns(Responses.Get.me_message);
+
+            var c = ClientFactory.GetClient(fake, timeout: TimeSpan.Zero);
+            Assert.ThrowsAsync<TaskCanceledException>(async () => await c.GetAsync("/me"));
         }
 
         [Test]
