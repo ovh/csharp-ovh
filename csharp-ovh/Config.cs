@@ -81,9 +81,9 @@ namespace Ovh.Api
         /// <summary>
         /// Create a config parser and load config from environment.
         /// </summary>
-        public ConfigurationManager(string confName)
+        public ConfigurationManager(string confFileName)
         {
-            string chosenPath = _configPaths.LastOrDefault(p => File.Exists(Path.Combine(p, confName)));
+            string chosenPath = _configPaths.LastOrDefault(p => File.Exists(Path.Combine(p, confFileName)));
             if (chosenPath == null)
             {
                 Config = new ConfigurationBuilder().Build();
@@ -92,7 +92,7 @@ namespace Ovh.Api
             {
                 var provider = new PhysicalFileProvider(chosenPath, ExclusionFilters.System);
                 Config = new ConfigurationBuilder()
-                    .AddIniFile(provider, confName, false, false)
+                    .AddIniFile(provider, confFileName, false, false)
                     .Build();
             }
         }
