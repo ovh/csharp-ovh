@@ -372,6 +372,7 @@ namespace Ovh.Api
         /// <param name="data">any json serializable data to send as request's body</param>
         /// <param name="needAuth">if False, bypass signature</param>
         /// <param name="isBatch">If true, this will query multiple resources in one call</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <exception cref="HttpException">When underlying request failed for network reason</exception>
         /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
         private async Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)

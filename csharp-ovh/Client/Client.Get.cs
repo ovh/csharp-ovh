@@ -71,6 +71,7 @@ namespace Ovh.Api
         /// <param name="target">API method to call</param>
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>Raw API response</returns>
         public Task<string> GetAsync(string target, QueryStringParams kwargs = null, bool needAuth = true, TimeSpan? timeout = null)
         {
@@ -84,6 +85,7 @@ namespace Ovh.Api
         /// <param name="target">API method to call</param>
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>Raw API response</returns>
         public Task<string> GetBatchAsync(string target, QueryStringParams kwargs = null, bool needAuth = true, TimeSpan? timeout = null)
         {
@@ -98,6 +100,7 @@ namespace Ovh.Api
         /// <param name="target">API method to call</param>
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>API response deserialized to T by JSON.Net</returns>
         public Task<T> GetAsync<T>(string target, QueryStringParams kwargs = null, bool needAuth = true, TimeSpan? timeout = null)
         {
@@ -112,6 +115,7 @@ namespace Ovh.Api
         /// <param name="target">API method to call</param>
         /// <param name="kwargs">Arguments to append to URL</param>
         /// <param name="needAuth">If true, send authentication headers</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>API response deserialized to List<T> by JSON.Net</returns>
         public Task<List<T>> GetBatchAsync<T>(string target, QueryStringParams kwargs = null, bool needAuth = true, TimeSpan? timeout = null)
         {
