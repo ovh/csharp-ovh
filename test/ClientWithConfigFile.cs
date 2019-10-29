@@ -34,6 +34,13 @@ namespace Ovh.Test
                 "endpoint=ovh-eu");
         }
 
+        public void CreateConfigFileWithSpecificFileName(string confFileName)
+        {
+            File.WriteAllText(confFileName,
+                "[default]" + Environment.NewLine +
+                "endpoint=ovh-eu");
+        }
+
         public void CreateConfigFileWithAllValues()
         {
             File.WriteAllText(".ovh.conf",
@@ -59,6 +66,14 @@ namespace Ovh.Test
         {
             CreateConfigFileWithEndpointOnly();
             Client client = new Client();
+            Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
+        }
+
+        [Test]
+        public void ValidConfigFileWithSpecificFileName()
+        {
+            CreateConfigFileWithSpecificFileName("some-specific-file.conf");
+            Client client = new Client(confFileName: "some-specific-file.conf");
             Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
         }
 
