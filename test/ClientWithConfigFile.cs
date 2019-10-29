@@ -10,14 +10,13 @@ namespace Ovh.Test
     public class ClientWithConfigFile
     {
         public const string OvhConfigFile = ".ovh.conf";
+        public const string CustomConfigFile = "some-specific-file.conf";
 
         [TearDown]
         public void RemoveConfigFile()
         {
-            if (File.Exists(OvhConfigFile))
-            {
-                File.Delete(OvhConfigFile);
-            }
+            File.Delete(OvhConfigFile);
+            File.Delete(CustomConfigFile);
         }
 
         public void CreateInvalidConfigFile()
@@ -72,8 +71,8 @@ namespace Ovh.Test
         [Test]
         public void ValidConfigFileWithSpecificFileName()
         {
-            CreateConfigFileWithSpecificFileName("some-specific-file.conf");
-            Client client = new Client(confFileName: "some-specific-file.conf");
+            CreateConfigFileWithSpecificFileName(CustomConfigFile);
+            Client client = new Client(confFileName: CustomConfigFile);
             Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
         }
 
