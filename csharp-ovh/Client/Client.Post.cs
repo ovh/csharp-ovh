@@ -42,10 +42,9 @@ namespace Ovh.Api
         /// <param name="needAuth">If true, send authentication headers</param>
         /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
-        public Task<T> PostAsync<T, Y>(string target, Y data, bool needAuth = true, TimeSpan? timeout = null)
-            where Y : class
+        public Task<T> PostAsync<T>(string target, object data, bool needAuth = true, TimeSpan? timeout = null)
         {
-            return CallAsync<T, Y>("POST", target, data, needAuth);
+            return CallAsync<T>("POST", target, data, needAuth);
         }
 
     }

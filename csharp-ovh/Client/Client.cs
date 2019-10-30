@@ -228,7 +228,7 @@ namespace Ovh.Api
         /// <returns>A result with the confirmation URL returned by the API</returns>
         public async Task<CredentialRequestResult> RequestConsumerKeyAsync(CredentialRequest credentialRequest)
         {
-            return await PostAsync<CredentialRequestResult, CredentialRequest>("/auth/credential", credentialRequest, false);
+            return await PostAsync<CredentialRequestResult>("/auth/credential", credentialRequest, false);
         }
 
         /// <summary>
@@ -362,8 +362,7 @@ namespace Ovh.Api
             return JsonConvert.DeserializeObject<T>(response);
         }
 
-        private Task<T> CallAsync<T, Y>(string method, string path, Y data = null, bool needAuth = true)
-            where Y : class
+        private Task<T> CallAsync<T>(string method, string path, object data = null, bool needAuth = true)
         {
             return CallAsync<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
         }

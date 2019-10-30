@@ -132,7 +132,7 @@ namespace Ovh.Test
             var lol = JsonConvert.SerializeObject(dummyContact);
 
             var c = ClientFactory.GetClient(testHandler).AsTestable(timeProvider);
-            var result = await c.PostAsync<Contact, Contact>("/me/contact", dummyContact);
+            var result = await c.PostAsync<Contact>("/me/contact", dummyContact);
 
             //Ensure that the call went through correctly
             Assert.AreEqual(123456, result.id);

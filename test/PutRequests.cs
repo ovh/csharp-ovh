@@ -88,7 +88,7 @@ namespace Ovh.Test
             var patch = new {address = new {line1 = "Hey there"} };
 
             var c = ClientFactory.GetClient(testHandler).AsTestable(timeProvider);
-            var result = await c.PutAsync<Contact, object>("/me/contact", patch);
+            var result = await c.PutAsync<Contact>("/me/contact", patch);
             Assert.AreEqual("00000", result.address.zip);
 
             var contactCall = Fake.GetCalls(testHandler).Where(call =>

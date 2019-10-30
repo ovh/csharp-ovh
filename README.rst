@@ -211,7 +211,7 @@ OVH to an arbitrary destination e-mail using API call
 
                 client.PostAsync(
                     String.Format("/email/domain/{0}/redirection", domain),
-                    JsonConvert.SerializeObject(payload)
+                    payload
                 ).Wait();
 
                 Console.WriteLine(
