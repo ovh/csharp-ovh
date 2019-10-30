@@ -134,9 +134,10 @@ namespace Ovh.Api
         }
 
         private void LoadConfiguration(string endpoint, string applicationKey,
-            string applicationSecret, string consumerKey, char parameterSeparator)
+            string applicationSecret, string consumerKey, char parameterSeparator, 
+            string confFileName = ".ovh.conf")
         {
-            ConfigurationManager = new ConfigurationManager();
+            ConfigurationManager = new ConfigurationManager(confFileName);
 
             try
             {
@@ -156,47 +157,23 @@ namespace Ovh.Api
             //ApplicationKey
             if (string.IsNullOrWhiteSpace(applicationKey))
             {
-                string tempApplicationKey;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "application_key", out tempApplicationKey))
-                {
-                    ApplicationKey = tempApplicationKey;
-                }
+                ConfigurationManager.TryGet(endpoint, "application_key", out applicationKey);
             }
-            else
-            {
-                ApplicationKey = applicationKey;
-            }
+            ApplicationKey = applicationKey;
 
             //SecretKey
             if (string.IsNullOrWhiteSpace(applicationSecret))
             {
-                string tempAppSecret;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "application_secret", out tempAppSecret))
-                {
-                    ApplicationSecret = tempAppSecret;
-                }
+                ConfigurationManager.TryGet(endpoint, "application_secret", out applicationSecret);
             }
-            else
-            {
-                ApplicationSecret = applicationSecret;
-            }
+            ApplicationSecret = applicationSecret;
 
             //ConsumerKey
             if (string.IsNullOrWhiteSpace(consumerKey))
             {
-                string tempConsumerKey;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "consumer_key", out tempConsumerKey))
-                {
-                    ConsumerKey = tempConsumerKey;
-                }
+                ConfigurationManager.TryGet(endpoint, "consumer_key", out consumerKey);
             }
-            else
-            {
-                ConsumerKey = consumerKey;
-            }
+            ConsumerKey = consumerKey;
 
             ParameterSeparator = parameterSeparator;
         }
@@ -223,9 +200,9 @@ namespace Ovh.Api
         public Client(string endpoint = null, string applicationKey = null,
             string applicationSecret = null, string consumerKey = null,
             TimeSpan? defaultTimeout = null, char parameterSeparator = ',',
-            HttpClient httpClient = null) : this()
+            HttpClient httpClient = null, string confFileName = ".ovh.conf") : this()
         {
-            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator);
+            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator, confFileName);
             _defaultTimeout = defaultTimeout ?? _defaultTimeout;
             _httpClient = httpClient ?? _httpClient ?? new HttpClient();
         }
@@ -242,17 +219,6 @@ namespace Ovh.Api
         {
             _timeProvider = customTimeProvider;
             return this;
-        }
-
-        /// <summary>
-        /// Generates a <c>ConsumerKey</c> request
-        /// </summary>
-        /// <param name="credentialRequest">The exact request to issue</param>
-        /// <returns>A result with the confirmation URL returned by the API</returns>
-        [Obsolete("This method relies on the obsolete 'Post' method. It will be removed when 'Post' is removed. Use RequestConsumerKeyAsync instead")]
-        public CredentialRequestResult RequestConsumerKey(CredentialRequest credentialRequest)
-        {
-            return Post<CredentialRequestResult, CredentialRequest>("/auth/credential", credentialRequest, false);
         }
 
         /// <summary>
@@ -334,29 +300,6 @@ namespace Ovh.Api
         #region Call
 
         /// <summary>
-        /// Lowest level call helper. If "consumerKey" is not "null", inject
-        /// authentication headers and sign the request.
-        /// Request signature is a sha1 hash on following fields, joined by '+'
-        ///  - application_secret
-        ///  - consumer_key
-        ///  - METHOD
-        ///  - full request url
-        ///  - body
-        ///  - server current time (takes time delta into account)
-        /// </summary>
-        /// <param name="method">HTTP verb. Usualy one of GET, POST, PUT, DELETE</param>
-        /// <param name="path">api entrypoint to call, relative to endpoint base path</param>
-        /// <param name="data">any json serializable data to send as request's body</param>
-        /// <param name="needAuth">if False, bypass signature</param>
-        /// <param name="isBatch">If true, this call will query multiple resources at the same time</param>
-        /// <exception cref="HttpException">When underlying request failed for network reason</exception>
-        /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
-        private string Call(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
-        {
-            return CallAsync(method, path, data, needAuth, isBatch).GetAwaiter().GetResult();
-        }
-
-        /// <summary>
         /// Lowest level async call helper. If "consumerKey" is not "null", inject
         /// authentication headers and sign the request.
         /// Request signature is a sha1 hash on following fields, joined by '+'
@@ -413,21 +356,10 @@ namespace Ovh.Api
             throw await ExtractExceptionFromHttpResponse(response);
         }
 
-        private T Call<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
-        {
-            return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth, isBatch: isBatch));
-        }
-
         private async Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)
         {
             var response = await CallAsync(method, path, data, needAuth, isBatch, timeout);
             return JsonConvert.DeserializeObject<T>(response);
-        }
-
-        private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true)
-            where Y : class
-        {
-            return Call<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
         }
 
         private Task<T> CallAsync<T, Y>(string method, string path, Y data = null, bool needAuth = true)
