@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Ovh.Api;
 using Ovh.Api.Exceptions;
+using System;
 
 namespace Ovh.Test
 {
@@ -25,7 +26,7 @@ namespace Ovh.Test
         {
             Client client =
                 new Client("ovh-eu", "applicationKey", "secretKey",
-                    "consumerKey", timeout: 120);
+                    "consumerKey", defaultTimeout: TimeSpan.FromSeconds(120));
             Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
         }
 
