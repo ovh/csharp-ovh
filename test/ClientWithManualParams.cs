@@ -25,7 +25,7 @@ namespace Ovh.Test
         {
             Client client =
                 new Client("ovh-eu", "applicationKey", "secretKey",
-                    "consumerKey", 120);
+                    "consumerKey", timeout: 120);
             Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
         }
 
