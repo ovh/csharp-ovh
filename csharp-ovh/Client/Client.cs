@@ -279,17 +279,6 @@ namespace Ovh.Api
         }
 
         /// <summary>
-        /// Generates a <c>ConsumerKey</c> request
-        /// </summary>
-        /// <param name="credentialRequest">The exact request to issue</param>
-        /// <returns>A result with the confirmation URL returned by the API</returns>
-        [Obsolete("This method relies on the obsolete 'Post' method. It will be removed when 'Post' is removed. Use RequestConsumerKeyAsync instead")]
-        public CredentialRequestResult RequestConsumerKey(CredentialRequest credentialRequest)
-        {
-            return Post<CredentialRequestResult, CredentialRequest>("/auth/credential", credentialRequest, false);
-        }
-
-        /// <summary>
         /// Generates an async <c>ConsumerKey</c> request
         /// </summary>
         /// <param name="credentialRequest">The exact request to issue</param>
@@ -368,29 +357,6 @@ namespace Ovh.Api
         #region Call
 
         /// <summary>
-        /// Lowest level call helper. If "consumerKey" is not "null", inject
-        /// authentication headers and sign the request.
-        /// Request signature is a sha1 hash on following fields, joined by '+'
-        ///  - application_secret
-        ///  - consumer_key
-        ///  - METHOD
-        ///  - full request url
-        ///  - body
-        ///  - server current time (takes time delta into account)
-        /// </summary>
-        /// <param name="method">HTTP verb. Usualy one of GET, POST, PUT, DELETE</param>
-        /// <param name="path">api entrypoint to call, relative to endpoint base path</param>
-        /// <param name="data">any json serializable data to send as request's body</param>
-        /// <param name="needAuth">if False, bypass signature</param>
-        /// <param name="isBatch">If true, this call will query multiple resources at the same time</param>
-        /// <exception cref="HttpException">When underlying request failed for network reason</exception>
-        /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
-        private string Call(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
-        {
-            return CallAsync(method, path, data, needAuth, isBatch).GetAwaiter().GetResult();
-        }
-
-        /// <summary>
         /// Lowest level async call helper. If "consumerKey" is not "null", inject
         /// authentication headers and sign the request.
         /// Request signature is a sha1 hash on following fields, joined by '+'
@@ -444,21 +410,10 @@ namespace Ovh.Api
             throw await ExtractExceptionFromHttpResponse(response);
         }
 
-        private T Call<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
-        {
-            return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth, isBatch: isBatch));
-        }
-
         private async Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
         {
             var response = await CallAsync(method, path, data, needAuth, isBatch);
             return JsonConvert.DeserializeObject<T>(response);
-        }
-
-        private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true)
-            where Y : class
-        {
-            return Call<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
         }
 
         private Task<T> CallAsync<T, Y>(string method, string path, Y data = null, bool needAuth = true)
