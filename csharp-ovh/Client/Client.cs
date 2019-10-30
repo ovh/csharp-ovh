@@ -161,47 +161,23 @@ namespace Ovh.Api
             //ApplicationKey
             if (string.IsNullOrWhiteSpace(applicationKey))
             {
-                string tempApplicationKey;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "application_key", out tempApplicationKey))
-                {
-                    ApplicationKey = tempApplicationKey;
-                }
+                ConfigurationManager.TryGet(endpoint, "application_key", out applicationKey);
             }
-            else
-            {
-                ApplicationKey = applicationKey;
-            }
+            ApplicationKey = applicationKey;
 
             //SecretKey
             if (string.IsNullOrWhiteSpace(applicationSecret))
             {
-                string tempAppSecret;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "application_secret", out tempAppSecret))
-                {
-                    ApplicationSecret = tempAppSecret;
-                }
+                ConfigurationManager.TryGet(endpoint, "application_secret", out applicationSecret);
             }
-            else
-            {
-                ApplicationSecret = applicationSecret;
-            }
+            ApplicationSecret = applicationSecret;
 
             //ConsumerKey
             if (string.IsNullOrWhiteSpace(consumerKey))
             {
-                string tempConsumerKey;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "consumer_key", out tempConsumerKey))
-                {
-                    ConsumerKey = tempConsumerKey;
-                }
+                ConfigurationManager.TryGet(endpoint, "consumer_key", out consumerKey);
             }
-            else
-            {
-                ConsumerKey = consumerKey;
-            }
+            ConsumerKey = consumerKey;
 
             ParameterSeparator = parameterSeparator;
         }
