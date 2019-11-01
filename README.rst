@@ -307,7 +307,7 @@ This example assumes an existing Configuration_ with valid ``application_key``,
                     var details = await client.GetAsync<PartialDedicatedServer>(serverUrl);
                     if (details.datacenter == "sbg1")
                     {
-                        await client.PutAsync(serverUrl + "/burst", "{\"status\":\"active\"}");
+                        await client.PutStringAsync(serverUrl + "/burst", "{\"status\":\"active\"}");
                         Console.WriteLine("Burst enabled on server " + serverId);
                     }
                 }

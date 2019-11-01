@@ -362,11 +362,6 @@ namespace Ovh.Api
             return JsonConvert.DeserializeObject<T>(response);
         }
 
-        private Task<T> CallAsync<T>(string method, string path, object data = null, bool needAuth = true)
-        {
-            return CallAsync<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
-        }
-
         #endregion
 
         private async Task<ApiException> ExtractExceptionFromHttpResponse(HttpResponseMessage response)
