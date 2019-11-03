@@ -87,7 +87,7 @@ namespace Ovh.Test
                 .Returns(Responses.Get.me_message);
 
             var c = ClientFactory.GetClient(fake, timeout: TimeSpan.Zero);
-            Assert.ThrowsAsync<TaskCanceledException>(async () => await c.GetAsync("/me"));
+            Assert.ThrowsAsync<TaskCanceledException>(() => c.GetAsync("/me"));
         }
 
         [Test]
