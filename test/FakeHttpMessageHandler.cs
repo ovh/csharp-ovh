@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ovh.Test
@@ -14,9 +15,15 @@ namespace Ovh.Test
             throw new NotImplementedException("Now we can setup this method with our mocking framework");
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            return await Task.Factory.StartNew(() => Send(request), cancellationToken);
+            return await Task.Factory.StartNew(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var response = Send(request);
+                cancellationToken.ThrowIfCancellationRequested();
+                return response;
+            }, cancellationToken);
         }
     }
 }
