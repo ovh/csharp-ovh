@@ -98,27 +98,6 @@ namespace Ovh.Api
         private bool _isTimeDeltaInitialized;
         private long _timeDelta;
 
-        /// <summary>
-        /// Request signatures are valid only for a short amount of time to mitigate
-        /// risk of attack replay scenarii which requires to use a common time
-        /// reference.This function queries endpoint's time and computes the delta.
-        /// This entrypoint does not require authentication.
-        /// This method is *lazy*. It will only load it once even though it is used
-        /// for each request.
-        /// </summary>
-        public long TimeDelta
-        {
-            get
-            {
-                if (!_isTimeDeltaInitialized)
-                {
-                    _timeDelta = ComputeTimeDelta().GetAwaiter().GetResult();
-                    _isTimeDeltaInitialized = true;
-                }
-                return _timeDelta;
-            }
-        }
-
         private ITimeProvider _timeProvider = new TimeProvider();
 
         private Client()
@@ -226,9 +205,9 @@ namespace Ovh.Api
         /// </summary>
         /// <param name="credentialRequest">The exact request to issue</param>
         /// <returns>A result with the confirmation URL returned by the API</returns>
-        public async Task<CredentialRequestResult> RequestConsumerKeyAsync(CredentialRequest credentialRequest)
+        public Task<CredentialRequestResult> RequestConsumerKeyAsync(CredentialRequest credentialRequest)
         {
-            return await PostAsync<CredentialRequestResult>("/auth/credential", credentialRequest, false);
+            return PostAsync<CredentialRequestResult>("/auth/credential", credentialRequest, false);
         }
 
         /// <summary>
@@ -259,7 +238,7 @@ namespace Ovh.Api
             return $"$1${signature}";
         }
 
-        private void SetHeaders(HttpRequestMessage msg, string method, string target, string data, bool needAuth, bool isBatch = false)
+        private async Task SetHeaders(HttpRequestMessage msg, string method, string target, string data, bool needAuth, bool isBatch = false)
         {
             var headers = msg.Headers;
             headers.Add(OVH_APP_HEADER, ApplicationKey);
@@ -283,7 +262,7 @@ namespace Ovh.Api
                 throw new InvalidKeyException("ConsumerKey is missing.");
             }
 
-            long currentTimestamp = _timeProvider.UtcNow.ToUnixTimeSeconds() + TimeDelta;
+            long currentTimestamp = _timeProvider.UtcNow.ToUnixTimeSeconds() + await GetTimeDelta().ConfigureAwait(false);
             string signature = GenerateSignature(
                 applicationSecret: ApplicationSecret,
                 consumerKey: ConsumerKey,
@@ -295,6 +274,24 @@ namespace Ovh.Api
             headers.Add(OVH_CONSUMER_HEADER, ConsumerKey);
             headers.Add(OVH_TIME_HEADER, currentTimestamp.ToString());
             headers.Add(OVH_SIGNATURE_HEADER, signature);
+        }
+
+        /// <summary>
+        /// Request signatures are valid only for a short amount of time to mitigate
+        /// risk of attack replay scenarii which requires to use a common time
+        /// reference.This function queries endpoint's time and computes the delta.
+        /// This entrypoint does not require authentication.
+        /// This method is *lazy*. It will only load it once even though it is used
+        /// for each request.
+        /// </summary>
+        public async Task<long> GetTimeDelta()
+        {
+            if (!_isTimeDeltaInitialized)
+            {
+                _timeDelta = await ComputeTimeDelta().ConfigureAwait(false);
+                _isTimeDeltaInitialized = true;
+            }
+            return _timeDelta;
         }
 
         #region Call
@@ -336,7 +333,7 @@ namespace Ovh.Api
                     msg.Content = new StringContent(data ?? "", Encoding.UTF8, "application/json");
                 }
 
-                SetHeaders(msg, method, Endpoint + path, data, needAuth, isBatch);
+                await SetHeaders(msg, method, Endpoint + path, data, needAuth, isBatch).ConfigureAwait(false);
 
                 using (var cts = new CancellationTokenSource(timeout ?? _defaultTimeout))
                 {
@@ -350,15 +347,15 @@ namespace Ovh.Api
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                return await response.Content.ReadAsStringAsync();
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
 
-            throw await ExtractExceptionFromHttpResponse(response);
+            throw await ExtractExceptionFromHttpResponse(response).ConfigureAwait(false);
         }
 
         private async Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)
         {
-            var response = await CallAsync(method, path, data, needAuth, isBatch, timeout);
+            var response = await CallAsync(method, path, data, needAuth, isBatch, timeout).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<T>(response);
         }
 
@@ -366,7 +363,8 @@ namespace Ovh.Api
 
         private async Task<ApiException> ExtractExceptionFromHttpResponse(HttpResponseMessage response)
         {
-            JObject responseObject = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+            var responseStr = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            JObject responseObject = JsonConvert.DeserializeObject<JObject>(responseStr);
             string message = "";
             string errorCode = "";
 
