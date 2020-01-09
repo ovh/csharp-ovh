@@ -3,13 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>csharp-ovh</AssemblyName>
-    <Version>4.0.0</Version>
-    <Authors>Luke Marlin</Authors>
-    <Company>OVH</Company>
-    <Description>Csharp-OVH Class Library</Description>
-    <PackageId>csharp-ovh</PackageId>
-    <PackageLicense>https://raw.githubusercontent.com/ovh/csharp-ovh/master/LICENSE</PackageLicense>
-    <RepositoryUrl>https://github.com/ovh/csharp-ovh</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,9 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-  <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-    <_Parameter1>test</_Parameter1>
-  </AssemblyAttribute>
-</ItemGroup>
-
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>test</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>
