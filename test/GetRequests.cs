@@ -33,7 +33,7 @@ namespace Ovh.Test
         }
 
         [Test]
-        public void GET_auth_time()
+        public async Task GET_auth_time()
         {
             var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(testHandler);
@@ -41,7 +41,7 @@ namespace Ovh.Test
             var httpClient = new HttpClient(testHandler);
             var c = new Client("ovh-eu", httpClient: httpClient).AsTestable(timeProvider);
 
-            Assert.AreEqual(2, c.TimeDelta);
+            Assert.AreEqual(2, await c.GetTimeDelta());
         }
 
         [Test]
