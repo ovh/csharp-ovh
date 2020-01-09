@@ -38,6 +38,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ovh.Api
@@ -63,7 +64,7 @@ namespace Ovh.Api
         private readonly Dictionary<string, string> _endpoints =
             new Dictionary<string, string>();
 
-        private const int _defaultTimeout = 180;
+        private TimeSpan _defaultTimeout = TimeSpan.FromSeconds(180);
 
         private static HttpClient _httpClient;
 
@@ -87,11 +88,6 @@ namespace Ovh.Api
         /// Consumer key that can be either <see cref="RequestConsumerKey">generated</see> or passed to the <see cref="ConfigurationManager">configuration manager</see>>
         /// </summary>
         public string ConsumerKey { get; set; }
-        /// <summary>
-        /// HTTP operations timeout
-        /// </summary>
-        [Obsolete("That property will be removed. If you want to give a specific timeout, pass it to the constructor, or give your own handler in the constructor")]
-        public int Timeout { get; set; }
 
         /// <summary>
         /// Character that will be considered as a value separator
@@ -101,27 +97,6 @@ namespace Ovh.Api
 
         private bool _isTimeDeltaInitialized;
         private long _timeDelta;
-
-        /// <summary>
-        /// Request signatures are valid only for a short amount of time to mitigate
-        /// risk of attack replay scenarii which requires to use a common time
-        /// reference.This function queries endpoint's time and computes the delta.
-        /// This entrypoint does not require authentication.
-        /// This method is *lazy*. It will only load it once even though it is used
-        /// for each request.
-        /// </summary>
-        public long TimeDelta
-        {
-            get
-            {
-                if (!_isTimeDeltaInitialized)
-                {
-                    _timeDelta = ComputeTimeDelta().GetAwaiter().GetResult();
-                    _isTimeDeltaInitialized = true;
-                }
-                return _timeDelta;
-            }
-        }
 
         private ITimeProvider _timeProvider = new TimeProvider();
 
@@ -138,9 +113,10 @@ namespace Ovh.Api
         }
 
         private void LoadConfiguration(string endpoint, string applicationKey,
-            string applicationSecret, string consumerKey, char parameterSeparator)
+            string applicationSecret, string consumerKey, char parameterSeparator, 
+            string confFileName = ".ovh.conf")
         {
-            ConfigurationManager = new ConfigurationManager();
+            ConfigurationManager = new ConfigurationManager(confFileName);
 
             try
             {
@@ -160,47 +136,23 @@ namespace Ovh.Api
             //ApplicationKey
             if (string.IsNullOrWhiteSpace(applicationKey))
             {
-                string tempApplicationKey;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "application_key", out tempApplicationKey))
-                {
-                    ApplicationKey = tempApplicationKey;
-                }
+                ConfigurationManager.TryGet(endpoint, "application_key", out applicationKey);
             }
-            else
-            {
-                ApplicationKey = applicationKey;
-            }
+            ApplicationKey = applicationKey;
 
             //SecretKey
             if (string.IsNullOrWhiteSpace(applicationSecret))
             {
-                string tempAppSecret;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "application_secret", out tempAppSecret))
-                {
-                    ApplicationSecret = tempAppSecret;
-                }
+                ConfigurationManager.TryGet(endpoint, "application_secret", out applicationSecret);
             }
-            else
-            {
-                ApplicationSecret = applicationSecret;
-            }
+            ApplicationSecret = applicationSecret;
 
             //ConsumerKey
             if (string.IsNullOrWhiteSpace(consumerKey))
             {
-                string tempConsumerKey;
-                if (ConfigurationManager.TryGet(
-                    endpoint, "consumer_key", out tempConsumerKey))
-                {
-                    ConsumerKey = tempConsumerKey;
-                }
+                ConfigurationManager.TryGet(endpoint, "consumer_key", out consumerKey);
             }
-            else
-            {
-                ConsumerKey = consumerKey;
-            }
+            ConsumerKey = consumerKey;
 
             ParameterSeparator = parameterSeparator;
         }
@@ -222,47 +174,17 @@ namespace Ovh.Api
         /// <param name="applicationKey">Application key as provided by OVH</param>
         /// <param name="applicationSecret">Application secret key as provided by OVH</param>
         /// <param name="consumerKey">User token as provided by OVH</param>
-        /// <param name="timeout">Connection timeout for each request</param>
+        /// <param name="defaultTimeout">Connection timeout for each request</param>
         /// <param name="parameterSeparator">Separator that should be used when sending Batch Requests</param>
         public Client(string endpoint = null, string applicationKey = null,
             string applicationSecret = null, string consumerKey = null,
-            int timeout = _defaultTimeout, char parameterSeparator = ',') : this()
+            TimeSpan? defaultTimeout = null, char parameterSeparator = ',',
+            HttpClient httpClient = null, string confFileName = ".ovh.conf") : this()
         {
-            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator);
-            Timeout = timeout;
-            if (_httpClient == null)
-            {
-                _httpClient = new HttpClient();
-                _httpClient.Timeout = new TimeSpan(0, 0, timeout);
-            }
+            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator, confFileName);
+            _defaultTimeout = defaultTimeout ?? _defaultTimeout;
+            _httpClient = httpClient ?? _httpClient ?? new HttpClient();
         }
-
-        /// <summary>
-        /// Creates a new Client. No credential check is done at this point.
-        /// The "applicationKey" identifies your application while
-        /// "applicationSecret" authenticates it. On the other hand, the
-        /// "consumerKey" uniquely identifies your application's end user without
-        /// requiring his personal password.
-        /// If any of "endpoint", "applicationKey", "applicationSecret"
-        /// or "consumerKey" is not provided, this client will attempt to locate
-        /// them from environment, %USERPROFILE%/.ovh.cfg and finally current_dir/.ovh.cfg.
-        /// </summary>
-        /// <remarks><c>httpClient</c> will be affect all existings <see cref=Ovh.Api.Client/>
-        /// because the <c>HttpClient</c> used by it is static</remarks>
-        /// <param name="client">An HttpClient that should be used to make requests.</param>
-        /// <param name="endpoint">API endpoint to use. Valid values in "Endpoints"</param>
-        /// <param name="applicationKey">Application key as provided by OVH</param>
-        /// <param name="applicationSecret">Application secret key as provided by OVH</param>
-        /// <param name="consumerKey">User token as provided by OVH</param>
-        /// <param name="parameterSeparator">Separator that should be used when sending Batch Requests</param>
-        public Client(HttpClient httpClient, string endpoint = null, string applicationKey = null,
-            string applicationSecret = null, string consumerKey = null,
-            char parameterSeparator = ',') : this()
-        {
-            LoadConfiguration(endpoint, applicationKey, applicationSecret, consumerKey, parameterSeparator);
-            _httpClient = httpClient;
-        }
-
 
         /// <summary>
         /// Returns the same client with a modified TimeProvider to make it unit-testable
@@ -279,24 +201,13 @@ namespace Ovh.Api
         }
 
         /// <summary>
-        /// Generates a <c>ConsumerKey</c> request
-        /// </summary>
-        /// <param name="credentialRequest">The exact request to issue</param>
-        /// <returns>A result with the confirmation URL returned by the API</returns>
-        [Obsolete("This method relies on the obsolete 'Post' method. It will be removed when 'Post' is removed. Use RequestConsumerKeyAsync instead")]
-        public CredentialRequestResult RequestConsumerKey(CredentialRequest credentialRequest)
-        {
-            return Post<CredentialRequestResult, CredentialRequest>("/auth/credential", credentialRequest, false);
-        }
-
-        /// <summary>
         /// Generates an async <c>ConsumerKey</c> request
         /// </summary>
         /// <param name="credentialRequest">The exact request to issue</param>
         /// <returns>A result with the confirmation URL returned by the API</returns>
-        public async Task<CredentialRequestResult> RequestConsumerKeyAsync(CredentialRequest credentialRequest)
+        public Task<CredentialRequestResult> RequestConsumerKeyAsync(CredentialRequest credentialRequest)
         {
-            return await PostAsync<CredentialRequestResult, CredentialRequest>("/auth/credential", credentialRequest, false);
+            return PostAsync<CredentialRequestResult>("/auth/credential", credentialRequest, false);
         }
 
         /// <summary>
@@ -327,7 +238,7 @@ namespace Ovh.Api
             return $"$1${signature}";
         }
 
-        private void SetHeaders(HttpRequestMessage msg, string method, string target, string data, bool needAuth, bool isBatch = false)
+        private async Task SetHeaders(HttpRequestMessage msg, string method, string target, string data, bool needAuth, bool isBatch = false)
         {
             var headers = msg.Headers;
             headers.Add(OVH_APP_HEADER, ApplicationKey);
@@ -351,7 +262,7 @@ namespace Ovh.Api
                 throw new InvalidKeyException("ConsumerKey is missing.");
             }
 
-            long currentTimestamp = _timeProvider.UtcNow.ToUnixTimeSeconds() + TimeDelta;
+            long currentTimestamp = _timeProvider.UtcNow.ToUnixTimeSeconds() + await GetTimeDelta().ConfigureAwait(false);
             string signature = GenerateSignature(
                 applicationSecret: ApplicationSecret,
                 consumerKey: ConsumerKey,
@@ -365,30 +276,25 @@ namespace Ovh.Api
             headers.Add(OVH_SIGNATURE_HEADER, signature);
         }
 
-        #region Call
-
         /// <summary>
-        /// Lowest level call helper. If "consumerKey" is not "null", inject
-        /// authentication headers and sign the request.
-        /// Request signature is a sha1 hash on following fields, joined by '+'
-        ///  - application_secret
-        ///  - consumer_key
-        ///  - METHOD
-        ///  - full request url
-        ///  - body
-        ///  - server current time (takes time delta into account)
+        /// Request signatures are valid only for a short amount of time to mitigate
+        /// risk of attack replay scenarii which requires to use a common time
+        /// reference.This function queries endpoint's time and computes the delta.
+        /// This entrypoint does not require authentication.
+        /// This method is *lazy*. It will only load it once even though it is used
+        /// for each request.
         /// </summary>
-        /// <param name="method">HTTP verb. Usualy one of GET, POST, PUT, DELETE</param>
-        /// <param name="path">api entrypoint to call, relative to endpoint base path</param>
-        /// <param name="data">any json serializable data to send as request's body</param>
-        /// <param name="needAuth">if False, bypass signature</param>
-        /// <param name="isBatch">If true, this call will query multiple resources at the same time</param>
-        /// <exception cref="HttpException">When underlying request failed for network reason</exception>
-        /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
-        private string Call(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
+        public async Task<long> GetTimeDelta()
         {
-            return CallAsync(method, path, data, needAuth, isBatch).GetAwaiter().GetResult();
+            if (!_isTimeDeltaInitialized)
+            {
+                _timeDelta = await ComputeTimeDelta().ConfigureAwait(false);
+                _isTimeDeltaInitialized = true;
+            }
+            return _timeDelta;
         }
+
+        #region Call
 
         /// <summary>
         /// Lowest level async call helper. If "consumerKey" is not "null", inject
@@ -406,9 +312,10 @@ namespace Ovh.Api
         /// <param name="data">any json serializable data to send as request's body</param>
         /// <param name="needAuth">if False, bypass signature</param>
         /// <param name="isBatch">If true, this will query multiple resources in one call</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <exception cref="HttpException">When underlying request failed for network reason</exception>
         /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
-        private async Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
+        private async Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)
         {
             if (path.StartsWith("/"))
             {
@@ -421,57 +328,43 @@ namespace Ovh.Api
             {
                 var httpMethod = new HttpMethod(method);
                 HttpRequestMessage msg = new HttpRequestMessage(httpMethod, new Uri(Endpoint + path));
-                if (httpMethod != HttpMethod.Get)
+                if (httpMethod != HttpMethod.Get && data != null)
                 {
-                    if (data != null)
-                    {
-                        msg.Content = new StringContent(data ?? "", Encoding.UTF8, "application/json");
-                    }
+                    msg.Content = new StringContent(data ?? "", Encoding.UTF8, "application/json");
                 }
-                SetHeaders(msg, method, Endpoint + path, data, needAuth, isBatch);
-                response = await _httpClient.SendAsync(msg).ConfigureAwait(false);
+
+                await SetHeaders(msg, method, Endpoint + path, data, needAuth, isBatch).ConfigureAwait(false);
+
+                using (var cts = new CancellationTokenSource(timeout ?? _defaultTimeout))
+                {
+                    response = await _httpClient.SendAsync(msg, cts.Token).ConfigureAwait(false);
+                }
             }
             catch (HttpRequestException e)
             {
                 throw new HttpException("An exception occured while trying to issue the HTTP call", e);
             }
 
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                return await response.Content.ReadAsStringAsync();
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
 
-            throw await ExtractExceptionFromHttpResponse(response);
+            throw await ExtractExceptionFromHttpResponse(response).ConfigureAwait(false);
         }
 
-        private T Call<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
+        private async Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)
         {
-            return JsonConvert.DeserializeObject<T>(Call(method, path, data, needAuth, isBatch: isBatch));
-        }
-
-        private async Task<T> CallAsync<T>(string method, string path, string data = null, bool needAuth = true, bool isBatch = false)
-        {
-            var response = await CallAsync(method, path, data, needAuth, isBatch);
+            var response = await CallAsync(method, path, data, needAuth, isBatch, timeout).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<T>(response);
-        }
-
-        private T Call<T, Y>(string method, string path, Y data = null, bool needAuth = true)
-            where Y : class
-        {
-            return Call<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
-        }
-
-        private Task<T> CallAsync<T, Y>(string method, string path, Y data = null, bool needAuth = true)
-            where Y : class
-        {
-            return CallAsync<T>(method, path, JsonConvert.SerializeObject(data), needAuth);
         }
 
         #endregion
 
         private async Task<ApiException> ExtractExceptionFromHttpResponse(HttpResponseMessage response)
         {
-            JObject responseObject = JsonConvert.DeserializeObject<JObject>(await response.Content.ReadAsStringAsync());
+            var responseStr = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            JObject responseObject = JsonConvert.DeserializeObject<JObject>(responseStr);
             string message = "";
             string errorCode = "";
 

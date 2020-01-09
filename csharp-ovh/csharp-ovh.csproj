@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>csharp-ovh</AssemblyName>
-    <Version>3.3.0</Version>
+    <Version>4.0.0</Version>
     <Authors>Luke Marlin</Authors>
     <Company>OVH</Company>
     <Description>Csharp-OVH Class Library</Description>
     <PackageId>csharp-ovh</PackageId>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/ovh/csharp-ovh/master/LICENSE</PackageLicenseUrl>
+    <PackageLicense>https://raw.githubusercontent.com/ovh/csharp-ovh/master/LICENSE</PackageLicense>
     <RepositoryUrl>https://github.com/ovh/csharp-ovh</RepositoryUrl>
   </PropertyGroup>
 

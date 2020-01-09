@@ -32,7 +32,37 @@ namespace Ovh.Test
         }
 
         [Test]
-        public async Task UT_with_data_as_string_and_result_as_string()
+        public async Task PUT_with_raw_string_data_and_string_result()
+        {
+            var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
+            MockAuthTimeCallWithFakeItEasy(testHandler);
+            A.CallTo(() =>
+                testHandler.Send(A<HttpRequestMessage>.That.Matches(
+                    r => r.RequestUri.ToString().Contains("/me/contact"))))
+                .Returns(Responses.Put.me_contact_message);
+
+            var c = ClientFactory.GetClient(testHandler).AsTestable(timeProvider);
+            var result = await c.PutStringAsync("/me/contact", "Fake content");
+            Assert.AreEqual(Responses.Put.me_contact_content, result);
+
+            var contactCall = Fake.GetCalls(testHandler).Where(call =>
+                call.Method.Name == "Send" &&
+                call.GetArgument<HttpRequestMessage>("request").RequestUri.ToString().Contains("/me/contact")).First();
+
+            var requestMessage = contactCall.GetArgument<HttpRequestMessage>("request");
+            var headers = requestMessage.Headers;
+            Assert.Multiple(() => {
+                Assert.AreEqual(HttpMethod.Put, requestMessage.Method);
+                Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
+                Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
+                Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
+                Assert.AreEqual("$1$5e81842c0f0c806fd703de084d80192a59bc0f8a", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+            });
+        }
+
+
+        [Test]
+        public async Task PUT_with_string_to_be_serialized_data_and_string_result()
         {
             var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(testHandler);
@@ -56,12 +86,12 @@ namespace Ovh.Test
                 Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
                 Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$5e81842c0f0c806fd703de084d80192a59bc0f8a", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual("$1$ec5195342ad1c81073c2eb3f3d83dd20942c4408", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 
         [Test]
-        public async Task UT_with_data_as_string_and_result_as_T()
+        public async Task PUT_with_raw_string_data_and_T_result()
         {
             var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(testHandler);
@@ -76,7 +106,7 @@ namespace Ovh.Test
         }
 
         [Test]
-        public async Task UT_with_data_as_T_and_result_as_T()
+        public async Task PUT_with_no_data_and_string_result()
         {
             var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(testHandler);
@@ -88,7 +118,58 @@ namespace Ovh.Test
             var patch = new {address = new {line1 = "Hey there"} };
 
             var c = ClientFactory.GetClient(testHandler).AsTestable(timeProvider);
-            var result = await c.PutAsync<Contact, object>("/me/contact", patch);
+            var result = await c.PutAsync("/me/contact");
+            Assert.AreEqual(Responses.Put.me_contact_content, result);
+
+            var contactCall = Fake.GetCalls(testHandler).Where(call =>
+                call.Method.Name == "Send" &&
+                call.GetArgument<HttpRequestMessage>("request").RequestUri.ToString().Contains("/me/contact")).First();
+
+            var requestMessage = contactCall.GetArgument<HttpRequestMessage>("request");
+            var headers = requestMessage.Headers;
+            Assert.AreEqual("$1$5595b180f954de130f8da7a5a4b55adc3d27556f", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+        }
+
+
+        [Test]
+        public async Task PUT_with_no_data_and_T_result()
+        {
+            var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
+            MockAuthTimeCallWithFakeItEasy(testHandler);
+            A.CallTo(() =>
+                testHandler.Send(A<HttpRequestMessage>.That.Matches(
+                    r => r.RequestUri.ToString().Contains("/me/contact"))))
+                .Returns(Responses.Put.me_contact_message);
+
+            var patch = new {address = new {line1 = "Hey there"} };
+
+            var c = ClientFactory.GetClient(testHandler).AsTestable(timeProvider);
+            var result = await c.PutAsync<Contact>("/me/contact");
+            Assert.AreEqual("00000", result.address.zip);
+
+            var contactCall = Fake.GetCalls(testHandler).Where(call =>
+                call.Method.Name == "Send" &&
+                call.GetArgument<HttpRequestMessage>("request").RequestUri.ToString().Contains("/me/contact")).First();
+
+            var requestMessage = contactCall.GetArgument<HttpRequestMessage>("request");
+            var headers = requestMessage.Headers;
+            Assert.AreEqual("$1$5595b180f954de130f8da7a5a4b55adc3d27556f", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+        }
+
+        [Test]
+        public async Task PUT_with_T_data_and_T_result()
+        {
+            var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
+            MockAuthTimeCallWithFakeItEasy(testHandler);
+            A.CallTo(() =>
+                testHandler.Send(A<HttpRequestMessage>.That.Matches(
+                    r => r.RequestUri.ToString().Contains("/me/contact"))))
+                .Returns(Responses.Put.me_contact_message);
+
+            var patch = new {address = new {line1 = "Hey there"} };
+
+            var c = ClientFactory.GetClient(testHandler).AsTestable(timeProvider);
+            var result = await c.PutAsync<Contact>("/me/contact", patch);
             Assert.AreEqual("00000", result.address.zip);
 
             var contactCall = Fake.GetCalls(testHandler).Where(call =>

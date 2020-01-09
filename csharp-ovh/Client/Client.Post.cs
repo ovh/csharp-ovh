@@ -1,92 +1,65 @@
 using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Ovh.Api
 {
     public partial class Client
     {
         /// <summary>
-        /// Issues a POST call
+        /// Issues an async POST call
         /// </summary>
         /// <param name="target">API method to call</param>
-        /// <param name="data">Json data to send as body</param>
+        /// <param name="json">Json string to send as body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>Raw API response</returns>
-        [Obsolete("This method just calls the async version and applies 'GetAwaiter().GetResult()' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
-        public string Post(string target, string data, bool needAuth = true)
+        public Task<string> PostStringAsync(string target, string json, bool needAuth = true, TimeSpan? timeout = null)
         {
-            return Call("POST", target, data, needAuth);
-        }
-
-        /// <summary>
-        /// Issues a POST call
-        /// </summary>
-        /// <typeparam name="T">Expected return type</typeparam>
-        /// <param name="target">API method to call</param>
-        /// <param name="data">Json data to send as body</param>
-        /// <param name="needAuth">If true, send authentication headers</param>
-        /// <returns>API response deserialized to T by JSON.Net</returns>
-        [Obsolete("This method just calls the async version and applies 'GetAwaiter().GetResult()' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
-        public T Post<T>(string target, string data, bool needAuth = true)
-        {
-            return Call<T>("POST", target, data, needAuth);
-        }
-
-        /// <summary>
-        /// Issues a POST call
-        /// </summary>
-        /// <typeparam name="T">Expected return type</typeparam>
-        /// <typeparam name="Y">Input type</typeparam>
-        /// <param name="target">API method to call</param>
-        /// <param name="data">Json data to send as body</param>
-        /// <param name="needAuth">If true, send authentication headers</param>
-        /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
-        [Obsolete("This method just calls the async version and applies 'GetAwaiter().GetResult()' to it. You should not rely on this as it can cause deadlocks. This method will be removed in 4.0.0, switch to the async one.")]
-        public T Post<T, Y>(string target, Y data, bool needAuth = true)
-            where Y : class
-        {
-            return Call<T, Y>("POST", target, data, needAuth);
+            return CallAsync("POST", target, json, needAuth, timeout: timeout);
         }
 
         /// <summary>
         /// Issues an async POST call
         /// </summary>
         /// <param name="target">API method to call</param>
-        /// <param name="data">Json data to send as body</param>
+        /// <param name="data">Object to be serialized and sent as a json body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>Raw API response</returns>
-        public Task<string> PostAsync(string target, string data, bool needAuth = true)
+        public Task<string> PostAsync(string target, object data = null, bool needAuth = true, TimeSpan? timeout = null)
         {
-            return CallAsync("POST", target, data, needAuth);
+            string json = data is null ? null : JsonConvert.SerializeObject(data);
+            return CallAsync("POST", target, json, needAuth, timeout: timeout);
         }
 
         /// <summary>
-        /// Issues an async POST call
+        /// Issues an async POST call.
         /// </summary>
         /// <typeparam name="T">Expected return type</typeparam>
         /// <param name="target">API method to call</param>
-        /// <param name="data">Json data to send as body</param>
+        /// <param name="json">Json string to send as body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>API response deserialized to T by JSON.Net</returns>
-        public Task<T> PostAsync<T>(string target, string data, bool needAuth = true)
+        public Task<T> PostStringAsync<T>(string target, string json, bool needAuth = true, TimeSpan? timeout = null)
         {
-            return CallAsync<T>("POST", target, data, needAuth);
+            return CallAsync<T>("POST", target, json, needAuth, timeout: timeout);
         }
 
         /// <summary>
         /// Issues an aync POST call
         /// </summary>
         /// <typeparam name="T">Expected return type</typeparam>
-        /// <typeparam name="Y">Input type</typeparam>
         /// <param name="target">API method to call</param>
-        /// <param name="data">Json data to send as body</param>
+        /// <param name="data">Object to be serialized and sent as a json body</param>
         /// <param name="needAuth">If true, send authentication headers</param>
+        /// <param name="timeout">If specified, overrides default <see cref="Client"/>'s timeout with a custom one</param>
         /// <returns>API response deserialized to T by JSON.Net with Strongly typed object as input</returns>
-        public Task<T> PostAsync<T, Y>(string target, Y data, bool needAuth = true)
-            where Y : class
+        public Task<T> PostAsync<T>(string target, object data = null, bool needAuth = true, TimeSpan? timeout = null)
         {
-            return CallAsync<T, Y>("POST", target, data, needAuth);
+            string json = data is null ? null : JsonConvert.SerializeObject(data);
+            return CallAsync<T>("POST", target, json, needAuth, timeout: timeout);
         }
-
     }
 }

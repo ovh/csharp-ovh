@@ -7,6 +7,7 @@ using FakeItEasy;
 using System.Linq;
 using Ovh.Test.Models;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Ovh.Test
 {
@@ -32,15 +33,15 @@ namespace Ovh.Test
         }
 
         [Test]
-        public void GET_auth_time()
+        public async Task GET_auth_time()
         {
             var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(testHandler);
 
             var httpClient = new HttpClient(testHandler);
-            var c = new Client(httpClient, "ovh-eu").AsTestable(timeProvider);
+            var c = new Client("ovh-eu", httpClient: httpClient).AsTestable(timeProvider);
 
-            Assert.AreEqual(2, c.TimeDelta);
+            Assert.AreEqual(2, await c.GetTimeDelta());
         }
 
         [Test]
@@ -74,7 +75,23 @@ namespace Ovh.Test
         }
 
         [Test]
-        public async Task ET_me_as_T()
+        public void GET_me_throws_when_timeout_expires()
+        {
+            var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
+            MockAuthTimeCallWithFakeItEasy(fake);
+
+            A.CallTo(() =>
+                fake.Send(A<HttpRequestMessage>.That.Matches(
+                    r => r.RequestUri.ToString().Contains("/me"))))
+                .Invokes(() => Thread.Sleep(1000))
+                .Returns(Responses.Get.me_message);
+
+            var c = ClientFactory.GetClient(fake, timeout: TimeSpan.Zero);
+            Assert.ThrowsAsync<TaskCanceledException>(() => c.GetAsync("/me"));
+        }
+
+        [Test]
+        public async Task GET_me_as_T()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
@@ -95,7 +112,7 @@ namespace Ovh.Test
         }
 
         [Test]
-        public async Task ET_with_filter_generates_correct_signature()
+        public async Task GET_with_filter_generates_correct_signature()
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
