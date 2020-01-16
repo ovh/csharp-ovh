@@ -9,7 +9,7 @@ env:
 script:
   - dotnet restore
   - dotnet test test
-  - dotnet pack -c release csharp-ovh/csharp-ovh.csproj -p:NuspecFile=.nuspec
+  - dotnet pack -c Release csharp-ovh/csharp-ovh.csproj
 
 deploy:
   - provider: releases
