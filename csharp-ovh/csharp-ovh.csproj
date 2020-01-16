@@ -6,7 +6,7 @@
     <Title>OVH C# API Wrapper</Title>
     <PackageVersion>4.0.4</PackageVersion>
     <PackageDescription>A set of classes and helpers to make calls to OVH's APIs.</PackageDescription>
-    <authors>Luke Marlin; Julien Loir</authors>
+    <Authors>Luke Marlin;Julien Loir</Authors>
     <RepositoryUrl>https://github.com/ovh/csharp-ovh</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
