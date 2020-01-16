@@ -16,7 +16,7 @@ deploy:
     api_key:
       secure: ViIEe+6Ld0dvhMDWJ9FRxNTQJPywB1pmGczGiror3bOhOuHuGlYujNzrnoaKN8NRbhuwdNwUdRNLRf793dbngAhmaMBpZOaoHYMCW8JUguWC08DFKTXdqwqS1IKWLHF7x9eep9IGzNRozPXMx57cyJNBMfCDOxWFcI2UF2YTkYC+PbkKwnsp17rqsBiG46GNc7GToziVVyfckILJ92NElIbGOB7Hkew6DY3aDAMUzYfwtEXjKqg8tUBmDHJ8xz0XJnUGW8Ja7WtE9fDlODqblIYLsJBwavBkU2aELiNLm0dBlBOuca2CcmkHHXVAjJaxcdasTSjXoKTfyWKDiM5s1mltoexGQLTEQ3yIeAJayzzZcl2M2buGu7Vk91JIyJpJlWhXmiO9isipNmmA2cnd5expvyUCz4JnQN2nOJ2B64/eP7p8YQTzpZ3o9aSTXvpw5w5iVn/QpBfvGqPyVJMmJkOFkjhNivRZBeV2oPNH9ga98CugKQv5Cu2OzsFPNrqqckawfq/B8Ufv5iYu/zzrMkIs49O9IkhQf9sSL1aDHUbN2+ebM9p2900ZIfizKcshN06P8ffy5I0CVwP1cYOzyMAtoZ8ZLXWN2JcKWDjWmAwhEp2eKhD498KTf4dnLRIgDJExjnw/QlC2qemnJkRmXLN/CNk/Ez6cqZH8wLXAkFU=
     file_glob: true
-    file: csharp-ovh/bin/release/csharp-ovh.*.nupkg
+    file: csharp-ovh/bin/Release/csharp-ovh.*.nupkg
     skip_cleanup: true
     on:
       repo: ovh/csharp-ovh
@@ -24,9 +24,9 @@ deploy:
 
   - provider: script
     script:
-      - dotnet nuget push -s https://nuget.org -k $NUGET_API_KEY csharp-ovh/bin/release/csharp-ovh.*.nupkg
+      - dotnet nuget push -s https://nuget.org -k $NUGET_API_KEY csharp-ovh/bin/Release/csharp-ovh.*.nupkg
     file_glob: true
-    file: csharp-ovh/bin/release/csharp-ovh.*.nupkg
+    file: csharp-ovh/bin/Release/csharp-ovh.*.nupkg
     skip_cleanup: true
     on:
       repo: ovh/csharp-ovh
