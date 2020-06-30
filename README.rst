@@ -136,7 +136,7 @@ customer's informations:
                 );
 
                 CredentialRequestResult credentialRequestResult =
-                    client.RequestConsumerKey(requestPayload);
+                    await client.RequestConsumerKeyAsync(requestPayload);
                 Console.Write(
                     String.Format("Please visit {0} to authenticate ",
                         credentialRequestResult.ValidationUrl));
