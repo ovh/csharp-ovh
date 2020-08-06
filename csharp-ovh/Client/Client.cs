@@ -317,11 +317,6 @@ namespace Ovh.Api
         /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
         private async Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)
         {
-            if (path.StartsWith("/"))
-            {
-                path = path.Substring(1);
-            }
-
             HttpResponseMessage response = null;
 
             try
