@@ -103,7 +103,7 @@ namespace Ovh.Api
         private Client()
         {
             _endpoints.Add("ovh-eu", "https://eu.api.ovh.com/1.0/");
-            _endpoints.Add("ovh-us", "https://api.us.ovhcloud.com/1.0");
+            _endpoints.Add("ovh-us", "https://api.us.ovhcloud.com/1.0/");
             _endpoints.Add("ovh-ca", "https://ca.api.ovh.com/1.0/");
             _endpoints.Add("kimsufi-eu", "https://eu.api.kimsufi.com/1.0/");
             _endpoints.Add("kimsufi-ca", "https://ca.api.kimsufi.com/1.0/");
