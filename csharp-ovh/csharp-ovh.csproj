@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>csharp-ovh</AssemblyName>
     <Title>OVH C# API Wrapper</Title>
-    <PackageVersion>4.0.4</PackageVersion>
+    <PackageVersion>4.0.5</PackageVersion>
     <PackageDescription>A set of classes and helpers to make calls to OVH's APIs.</PackageDescription>
     <Authors>Luke Marlin;Julien Loir</Authors>
     <RepositoryUrl>https://github.com/ovh/csharp-ovh</RepositoryUrl>
