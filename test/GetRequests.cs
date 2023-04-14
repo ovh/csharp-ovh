@@ -45,7 +45,10 @@ namespace Ovh.Test
         }
 
         [Test]
-        public async Task GET_me_as_string()
+	[TestCase("/me", "https://eu.api.ovh.com/1.0/me", "$1$dfe0b86bf2ab0d9eb3f785dc1ab00de58984d80c")]
+	[TestCase("/v1/me", "https://eu.api.ovh.com/v1/me", "$1$b6849b8a25d6bc46c6ad1dfb0fc67d07db9553a3")]
+	[TestCase("/v2/me", "https://eu.api.ovh.com/v2/me", "$1$291bb7bdbef11b1050200a109a4fe5109ed96cdd")]
+        public async Task GET_me_as_string(string call, string called, string sig)
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
             MockAuthTimeCallWithFakeItEasy(fake);
@@ -57,7 +60,8 @@ namespace Ovh.Test
 
 
             var c = ClientFactory.GetClient(fake);
-            var result = await c.GetAsync("/me");
+
+            var result = await c.GetAsync(call);
             Assert.AreEqual(Responses.Get.me_content, result);
 
             var meCall = Fake.GetCalls(fake).Where(call =>
@@ -65,12 +69,16 @@ namespace Ovh.Test
                 call.GetArgument<HttpRequestMessage>("request").RequestUri.ToString().Contains("/me")).First();
 
             var requestMessage = meCall.GetArgument<HttpRequestMessage>("request");
+
+	    var uri = requestMessage.RequestUri;
+	    Assert.AreEqual(called, uri.AbsoluteUri);
+
             var headers = requestMessage.Headers;
             Assert.Multiple(() => {
                 Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
                 Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$dfe0b86bf2ab0d9eb3f785dc1ab00de58984d80c", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual(sig, headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 

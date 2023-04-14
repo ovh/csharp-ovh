@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>csharp-ovh</AssemblyName>
     <Title>OVH C# API Wrapper</Title>
     <PackageVersion>4.0.5</PackageVersion>

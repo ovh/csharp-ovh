@@ -238,6 +238,22 @@ namespace Ovh.Api
             return $"$1${signature}";
         }
 
+        private string GetTarget(string path)
+        {
+            if (path.StartsWith("/"))
+            {
+                path = path.Substring(1);
+            }
+
+            var endpoint = Endpoint.ToString();
+            if (endpoint.EndsWith("/1.0/") && (path.StartsWith("v1/") || path.StartsWith("v2/")))
+            {
+                endpoint = endpoint.Substring(0, endpoint.Length - 4);
+            }
+
+            return new Uri(endpoint) + path;
+        }
+
         private async Task SetHeaders(HttpRequestMessage msg, string method, string target, string data, bool needAuth, bool isBatch = false)
         {
             var headers = msg.Headers;
@@ -317,23 +333,19 @@ namespace Ovh.Api
         /// <exception cref="InvalidResponseException">when API response could not be decoded</exception>
         private async Task<string> CallAsync(string method, string path, string data = null, bool needAuth = true, bool isBatch = false, TimeSpan? timeout = null)
         {
-            if (path.StartsWith("/"))
-            {
-                path = path.Substring(1);
-            }
-
             HttpResponseMessage response = null;
 
             try
             {
                 var httpMethod = new HttpMethod(method);
-                HttpRequestMessage msg = new HttpRequestMessage(httpMethod, new Uri(Endpoint + path));
+                var target = GetTarget(path);
+                HttpRequestMessage msg = new HttpRequestMessage(httpMethod, target);
                 if (httpMethod != HttpMethod.Get && data != null)
                 {
                     msg.Content = new StringContent(data ?? "", Encoding.UTF8, "application/json");
                 }
 
-                await SetHeaders(msg, method, Endpoint + path, data, needAuth, isBatch).ConfigureAwait(false);
+                await SetHeaders(msg, method, target.ToString(), data, needAuth, isBatch).ConfigureAwait(false);
 
                 using (var cts = new CancellationTokenSource(timeout ?? _defaultTimeout))
                 {
