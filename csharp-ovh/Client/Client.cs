@@ -61,8 +61,7 @@ namespace Ovh.Api
         public const string OVH_SIGNATURE_HEADER = "X-Ovh-Signature";
         public const string OVH_BATCH_HEADER = "X-Ovh-Batch";
 
-        private readonly Dictionary<string, string> _endpoints =
-            new Dictionary<string, string>();
+        private readonly IReadOnlyDictionary<string, string> _endpoints;
 
         private TimeSpan _defaultTimeout = TimeSpan.FromSeconds(180);
 
@@ -102,14 +101,17 @@ namespace Ovh.Api
 
         private Client()
         {
-            _endpoints.Add("ovh-eu", "https://eu.api.ovh.com/1.0/");
-            _endpoints.Add("ovh-us", "https://api.us.ovhcloud.com/1.0/");
-            _endpoints.Add("ovh-ca", "https://ca.api.ovh.com/1.0/");
-            _endpoints.Add("kimsufi-eu", "https://eu.api.kimsufi.com/1.0/");
-            _endpoints.Add("kimsufi-ca", "https://ca.api.kimsufi.com/1.0/");
-            _endpoints.Add("soyoustart-eu", "https://eu.api.soyoustart.com/1.0/");
-            _endpoints.Add("soyoustart-ca", "https://ca.api.soyoustart.com/1.0/");
-            _endpoints.Add("runabove-ca", "https://api.runabove.com/1.0/");
+            _endpoints = new Dictionary<string, string>
+            {
+                { "ovh-eu", "https://eu.api.ovh.com/1.0/" },
+                { "ovh-us", "https://api.us.ovhcloud.com/1.0/" },
+                { "ovh-ca", "https://ca.api.ovh.com/1.0/" },
+                { "kimsufi-eu", "https://eu.api.kimsufi.com/1.0/" },
+                { "kimsufi-ca", "https://ca.api.kimsufi.com/1.0/" },
+                { "soyoustart-eu", "https://eu.api.soyoustart.com/1.0/" },
+                { "soyoustart-ca", "https://ca.api.soyoustart.com/1.0/" },
+                { "runabove-ca", "https://api.runabove.com/1.0/" }
+            };
         }
 
         private void LoadConfiguration(string endpoint, string applicationKey,
