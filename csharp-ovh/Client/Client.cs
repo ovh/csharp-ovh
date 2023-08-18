@@ -101,7 +101,7 @@ namespace Ovh.Api
 
         private Client()
         {
-            _endpoints = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>
+            _endpoints = new Dictionary<string, string>
             {
                 { "ovh-eu", "https://eu.api.ovh.com/1.0/" },
                 { "ovh-us", "https://api.us.ovhcloud.com/1.0/" },
@@ -111,7 +111,7 @@ namespace Ovh.Api
                 { "soyoustart-eu", "https://eu.api.soyoustart.com/1.0/" },
                 { "soyoustart-ca", "https://ca.api.soyoustart.com/1.0/" },
                 { "runabove-ca", "https://api.runabove.com/1.0/" }
-            });
+            };
         }
 
         private void LoadConfiguration(string endpoint, string applicationKey,
