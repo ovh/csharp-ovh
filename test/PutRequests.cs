@@ -180,5 +180,28 @@ namespace Ovh.Test
             var headers = requestMessage.Headers;
             Assert.AreEqual("$1$747cdaf92e412ea434a387e6ff7b20150ee1172f", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
         }
+
+        [Test]
+        public async Task PUT_with_no_content_result()
+        {
+            var testHandler = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
+            MockAuthTimeCallWithFakeItEasy(testHandler);
+            A.CallTo(() => 
+                    testHandler.Send(A<HttpRequestMessage>.That.Matches(
+                        r => r.RequestUri.ToString().Contains("/me/contact"))))
+                .Returns(Responses.PutWith204Response.response_204_message);
+
+            var c = ClientFactory.GetClient(testHandler).AsTestable(timeProvider);
+            var result = await c.PutAsync("/me/contact");
+            Assert.AreEqual(Responses.PutWith204Response.success_204_response, result);
+
+            var contactCall = Fake.GetCalls(testHandler).Where(call =>
+                call.Method.Name == "Send" &&
+                call.GetArgument<HttpRequestMessage>("request").RequestUri.ToString().Contains("/me/contact")).First();
+
+            var requestMessage = contactCall.GetArgument<HttpRequestMessage>("request");
+            var headers = requestMessage.Headers;
+            Assert.AreEqual("$1$5595b180f954de130f8da7a5a4b55adc3d27556f", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+        }
     }
 }
