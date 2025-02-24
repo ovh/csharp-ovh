@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/ovh/csharp-ovh.svg?branch=master
-    :target: https://travis-ci.org/ovh/csharp-ovh
+.. image:: https://badge.fury.io/nu/csharp-ovh.svg
+    :target: https://www.nuget.org/packages/csharp-ovh
 
 Lightweight wrapper around OVH's APIs. Handles all the hard work including
 credential creation and requests signing.
