@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>csharp-ovh</AssemblyName>
-    <Title>OVH C# API Wrapper</Title>
-    <PackageVersion>4.0.5</PackageVersion>
-    <PackageDescription>A set of classes and helpers to make calls to OVH's APIs.</PackageDescription>
-    <Authors>Luke Marlin;Julien Loir</Authors>
+    <Title>OVHcloud C# API Wrapper</Title>
+    <PackageVersion>4.0.6</PackageVersion>
+    <PackageDescription>A set of classes and helpers to make calls to OVHcloud's APIs.</PackageDescription>
+    <Authors>OVHcloud</Authors>
     <RepositoryUrl>https://github.com/ovh/csharp-ovh</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
