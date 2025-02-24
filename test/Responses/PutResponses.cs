@@ -9,4 +9,10 @@ namespace Ovh.Test.Responses
         public static readonly HttpResponseMessage me_contact_message =
             HttpResponseMessageFactory.Create(me_contact_content, HttpStatusCode.OK);
     }
+    public static class PutWith204Response
+    {
+        public static readonly string success_204_response = "Success ; Response Status: No Content:204";
+        public static readonly HttpResponseMessage response_204_message =
+            HttpResponseMessageFactory.Create(success_204_response, HttpStatusCode.NoContent);
+    }
 }
