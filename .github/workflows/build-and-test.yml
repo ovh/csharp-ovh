@@ -1,38 +1,40 @@
 # From https://learn.microsoft.com/en-us/dotnet/devops/dotnet-test-github-action
-name: build and test
+name: Build and test
+
+permissions:
+  contents: read
 
 on:
   push:
   pull_request:
-    branches: [ master ]
+    branches: [master]
     paths:
-    - '**.cs'
-    - '**.csproj'
+      - "**.cs"
+      - "**.csproj"
 
 env:
-  DOTNET_VERSION: '6.0.401' # The .NET SDK version to use
+  DOTNET_VERSION: "6.0.401" # The .NET SDK version to use
 
 jobs:
   build-and-test:
-
     name: build-and-test-${{matrix.os}}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Checkout Repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=v4.2.2
+        with:
+          persist-credentials: "false"
 
-    - name: Install dependencies
-      run: dotnet restore
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+      - name: Install dependencies
+        run: dotnet restore
 
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
