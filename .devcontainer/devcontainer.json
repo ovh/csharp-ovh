@@ -3,7 +3,7 @@
 {
 	"name": "csharp-ovh",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm"
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -19,4 +19,12 @@
 	// "customizations": {},
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-dotnettools.csdevkit",
+				"GitHub.vscode-github-actions"
+			]
+		}
+	}
 }
