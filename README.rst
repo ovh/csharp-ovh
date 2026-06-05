@@ -15,7 +15,7 @@ credential creation and requests signing.
         {
             static async Task Main(string[] args)
             {
-                // Instantiate. Visit https://api.ovh.com/createToken/index.cgi?GET=/me
+                // Instantiate. Visit https://auth.eu.ovhcloud.com/api/createToken/index.cgi?GET=/me
                 // to get your credentials
                 Client client = new Client("ovh-eu", "<application_key>", "<application_secret>", "<consumer_key>");
                 PartialMe me = await client.GetAsync<PartialMe>("/me");
@@ -56,9 +56,9 @@ To interact with the APIs, the SDK needs to identify itself using an
 ``application_key`` and an ``application_secret``. To get them, you need
 to register your application. Depending the API you plan to use, visit:
 
-- `OVH Europe <https://eu.api.ovh.com/createApp/>`_
+- `OVH Europe <https://auth.eu.ovhcloud.com/api/createApp/>`_
 - `OVH US <https://api.us.ovhcloud.com/createApp/>`_
-- `OVH North-America <https://ca.api.ovh.com/createApp/>`_
+- `OVH North-America <https://auth.ca.ovhcloud.com/api/createApp/>`_
 - `So you Start Europe <https://eu.api.soyoustart.com/createApp/>`_
 - `So you Start North America <https://ca.api.soyoustart.com/createApp/>`_
 - `Kimsufi Europe <https://eu.api.kimsufi.com/createApp/>`_
@@ -429,11 +429,11 @@ Supported APIs
 OVH Europe
 ----------
 
-- **Documentation**: https://eu.api.ovh.com/
+- **Documentation**: https://api.eu.ovhcloud.com/
 - **Community support**: api-subscribe@ml.ovh.net
-- **Console**: https://eu.api.ovh.com/console
-- **Create application credentials**: https://eu.api.ovh.com/createApp/
-- **Create script credentials** (all keys at once): https://eu.api.ovh.com/createToken/
+- **Console**: https://api.eu.ovhcloud.com/console
+- **Create application credentials**: https://auth.eu.ovhcloud.com/api/createApp/
+- **Create script credentials** (all keys at once): https://auth.eu.ovhcloud.com/api/createToken/
 
 OVH US
 ----------
@@ -447,11 +447,11 @@ OVH US
 OVH North America
 -----------------
 
-- **Documentation**: https://ca.api.ovh.com/
+- **Documentation**: https://api.ca.ovhcloud.com/
 - **Community support**: api-subscribe@ml.ovh.net
-- **Console**: https://ca.api.ovh.com/console
-- **Create application credentials**: https://ca.api.ovh.com/createApp/
-- **Create script credentials** (all keys at once): https://ca.api.ovh.com/createToken/
+- **Console**: https://api.ca.ovhcloud.com/console
+- **Create application credentials**: https://auth.ca.ovhcloud.com/api/createApp/
+- **Create script credentials** (all keys at once): https://auth.ca.ovhcloud.com/api/createToken/
 
 So you Start Europe
 -------------------

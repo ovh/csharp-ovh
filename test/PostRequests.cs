@@ -56,7 +56,7 @@ namespace Ovh.Test
                 Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
                 Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$3473ad8790d09e6d28f8a9d6f09a05c1f5f0bbfc", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual("$1$39be1fc4d5de5943625757c66502b7795eea5d33", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 
@@ -101,7 +101,7 @@ namespace Ovh.Test
                 Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
                 Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$19a8f2db1a3b2b89b231c7872332b6ba117d8bd7", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual("$1$a653bd5fc3140295fb5667af029a538fc011b1e6", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 
@@ -129,7 +129,7 @@ namespace Ovh.Test
                 Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
                 Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$8a6f2668c14048c59ca957bc26b16a29180ffb03", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual("$1$9246fa2a1f62c9629982b8c22d8397c2aa2fa510", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 
@@ -157,7 +157,7 @@ namespace Ovh.Test
                 Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
                 Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$8a6f2668c14048c59ca957bc26b16a29180ffb03", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual("$1$9246fa2a1f62c9629982b8c22d8397c2aa2fa510", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 

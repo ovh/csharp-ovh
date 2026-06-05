@@ -56,7 +56,7 @@ namespace Ovh.Test
                 Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
                 Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$5e81842c0f0c806fd703de084d80192a59bc0f8a", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual("$1$a5d75bc1ad55baed9bfaf9d4de04b4fea73f5b2d", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 
@@ -86,7 +86,7 @@ namespace Ovh.Test
                 Assert.AreEqual(Constants.APPLICATION_KEY, headers.GetValues(Client.OVH_APP_HEADER).First());
                 Assert.AreEqual(Constants.CONSUMER_KEY, headers.GetValues(Client.OVH_CONSUMER_HEADER).First());
                 Assert.AreEqual(currentServerTimestamp.ToString(), headers.GetValues(Client.OVH_TIME_HEADER).First());
-                Assert.AreEqual("$1$ec5195342ad1c81073c2eb3f3d83dd20942c4408", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+                Assert.AreEqual("$1$800ce5da59cfa973a5096da9837dd5b0c47b697d", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
             });
         }
 
@@ -127,7 +127,7 @@ namespace Ovh.Test
 
             var requestMessage = contactCall.GetArgument<HttpRequestMessage>("request");
             var headers = requestMessage.Headers;
-            Assert.AreEqual("$1$5595b180f954de130f8da7a5a4b55adc3d27556f", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+            Assert.AreEqual("$1$fafa5e93d12762c1799d78603fbad07b29ab3f07", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
         }
 
 
@@ -153,7 +153,7 @@ namespace Ovh.Test
 
             var requestMessage = contactCall.GetArgument<HttpRequestMessage>("request");
             var headers = requestMessage.Headers;
-            Assert.AreEqual("$1$5595b180f954de130f8da7a5a4b55adc3d27556f", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+            Assert.AreEqual("$1$fafa5e93d12762c1799d78603fbad07b29ab3f07", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
         }
 
         [Test]
@@ -178,7 +178,7 @@ namespace Ovh.Test
 
             var requestMessage = contactCall.GetArgument<HttpRequestMessage>("request");
             var headers = requestMessage.Headers;
-            Assert.AreEqual("$1$747cdaf92e412ea434a387e6ff7b20150ee1172f", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+            Assert.AreEqual("$1$b41bccc5a1fe66a0e17616bab6712929480e2155", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
         }
 
         [Test]
@@ -201,7 +201,7 @@ namespace Ovh.Test
 
             var requestMessage = contactCall.GetArgument<HttpRequestMessage>("request");
             var headers = requestMessage.Headers;
-            Assert.AreEqual("$1$5595b180f954de130f8da7a5a4b55adc3d27556f", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+            Assert.AreEqual("$1$fafa5e93d12762c1799d78603fbad07b29ab3f07", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
         }
     }
 }

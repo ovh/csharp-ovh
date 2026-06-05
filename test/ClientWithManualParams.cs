@@ -18,7 +18,7 @@ namespace Ovh.Test
         public void ValidEndpointParam()
         {
             Client client = new Client("ovh-eu");
-            Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
+            Assert.AreEqual(client.Endpoint, "https://api.eu.ovhcloud.com/1.0/");
         }
 
         [Test]
@@ -27,7 +27,7 @@ namespace Ovh.Test
             Client client =
                 new Client("ovh-eu", "applicationKey", "secretKey",
                     "consumerKey", defaultTimeout: TimeSpan.FromSeconds(120));
-            Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
+            Assert.AreEqual(client.Endpoint, "https://api.eu.ovhcloud.com/1.0/");
         }
 
         [Test]

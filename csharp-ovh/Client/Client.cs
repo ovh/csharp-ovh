@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2013-2016, OVH SAS.
+﻿//Copyright(c) 2013-2026, OVH SAS.
 //All rights reserved.
 
 //Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,8 @@ namespace Ovh.Api
 {
     //This module provides a simple C# wrapper over the OVH REST API.
     //It handles requesting credential, signing queries...
-    // - To get your API keys: https://eu.api.ovh.com/createApp/
-    // - To get started with API: https://api.ovh.com/g934.first_step_with_api
+    // - To get your API keys: https://auth.eu.ovhcloud.com/api/createApp/
+    // - To get started with API: https://api.eu.ovhcloud.com/g934.first_step_with_api
 
     /// <summary>
     /// Low level OVH Client. It abstracts all the authentication and request
@@ -102,9 +102,9 @@ namespace Ovh.Api
 
         private Client()
         {
-            _endpoints.Add("ovh-eu", "https://eu.api.ovh.com/1.0/");
+            _endpoints.Add("ovh-eu", "https://api.eu.ovhcloud.com/1.0/");
             _endpoints.Add("ovh-us", "https://api.us.ovhcloud.com/1.0/");
-            _endpoints.Add("ovh-ca", "https://ca.api.ovh.com/1.0/");
+            _endpoints.Add("ovh-ca", "https://api.ca.ovhcloud.com/1.0/");
             _endpoints.Add("kimsufi-eu", "https://eu.api.kimsufi.com/1.0/");
             _endpoints.Add("kimsufi-ca", "https://ca.api.kimsufi.com/1.0/");
             _endpoints.Add("soyoustart-eu", "https://eu.api.soyoustart.com/1.0/");
