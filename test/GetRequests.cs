@@ -45,9 +45,9 @@ namespace Ovh.Test
         }
 
         [Test]
-	[TestCase("/me", "https://eu.api.ovh.com/1.0/me", "$1$dfe0b86bf2ab0d9eb3f785dc1ab00de58984d80c")]
-	[TestCase("/v1/me", "https://eu.api.ovh.com/v1/me", "$1$b6849b8a25d6bc46c6ad1dfb0fc67d07db9553a3")]
-	[TestCase("/v2/me", "https://eu.api.ovh.com/v2/me", "$1$291bb7bdbef11b1050200a109a4fe5109ed96cdd")]
+	[TestCase("/me", "https://api.eu.ovhcloud.com/1.0/me", "$1$00f39a24f63d9dda8d684f8bc93d4d246eaf9f88")]
+	[TestCase("/v1/me", "https://api.eu.ovhcloud.com/v1/me", "$1$9c6478ad2a7899afc5faf17d79b60e35239788f5")]
+	[TestCase("/v2/me", "https://api.eu.ovhcloud.com/v2/me", "$1$9e2103416040c2f939f5998ff52a3c4f933862aa")]
         public async Task GET_me_as_string(string call, string called, string sig)
         {
             var fake = A.Fake<FakeHttpMessageHandler>(a => a.CallsBaseMethods());
@@ -144,7 +144,7 @@ namespace Ovh.Test
 
             var requestMessage = meCall.GetArgument<HttpRequestMessage>("request");
             var headers = requestMessage.Headers;
-            Assert.AreEqual("$1$098b93d342b6db4848ec448063be2b6884e94723", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
+            Assert.AreEqual("$1$353d2f22b44b6bf1b86dc488f486aaf16adb5d53", headers.GetValues(Client.OVH_SIGNATURE_HEADER).First());
         }
     }
 }

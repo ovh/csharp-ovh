@@ -33,7 +33,7 @@ namespace Ovh.Test
         public void ValidEndpoint()
         {
             Client client = new Client();
-            Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
+            Assert.AreEqual(client.Endpoint, "https://api.eu.ovhcloud.com/1.0/");
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace Ovh.Test
         {
             AddOtherParamsToEnv();
             Client client = new Client();
-            Assert.AreEqual(client.Endpoint, "https://eu.api.ovh.com/1.0/");
+            Assert.AreEqual(client.Endpoint, "https://api.eu.ovhcloud.com/1.0/");
             Assert.AreEqual(client.ApplicationKey, "my_app_key");
             Assert.AreEqual(client.ApplicationSecret, "my_application_secret");
             Assert.AreEqual(client.ConsumerKey, "my_consumer_key");
